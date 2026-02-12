@@ -1,17 +1,94 @@
 package org.example;
 
-//TIP Чтобы <b>запустить</b> код, нажмите <shortcut actionId="Run"/> или
-// нажмите на значок <icon src="AllIcons.Actions.Execute"/> в поле.
+
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Нажмите <shortcut actionId="ShowIntentionActions"/>, когда курсор находится на выделенном тексте
-        // чтобы увидеть, как OpenIDE предлагает это исправить.
-        System.out.printf("Hello and welcome!");
+        // User
+        User user1 = User.validate("hikaruvi", "Daniil Rybkin", "daniil@gmail.com");
+        User user2 = User.validate("hikaruvi", "Daniil Rybkin", "daniil@gmail.com");
+        User user3 = User.validate("hikaruv", "Daniil Rybkin", "daniil@gmail.com");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Нажмите <shortcut actionId="Debug"/>, чтобы начать отладку вашего кода. Мы установили одну <icon src="AllIcons.Debugger.Db_set_breakpoint"/> точку останова
-            // для вас, но вы всегда можете добавить больше, нажав <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        System.out.println(user1.format());
+        System.out.println("user1 eq user2: " + user1.equals(user2));
+        System.out.println("user1 eq user3: " + user1.equals(user3));
+        System.out.println();
+
+        List<TestCase> testCases = new ArrayList<>();
+
+        testCases.add(new TestCase(null, "Daniil Rybkin", "d@gmail.com", false));
+        testCases.add(new TestCase("hikaruvi", null, "d@gmail.com", false));
+        testCases.add(new TestCase("hikaruvi", "Dan Ryb", null, false));
+
+        testCases.add(new TestCase("   \n  \t \r \f ", "Dan Ryb", "d@gmail.com", false));
+        testCases.add(new TestCase("hikaruvi", "   \n  \t \r \f ", "d@gmail.com", false));
+        testCases.add(new TestCase("hikaruvi", "Dan Ryb", "   \n  \t \r \f ", false));
+
+        testCases.add(new TestCase("hikaruv$", "Dan Ry", "d@mail.com", false));
+        testCases.add(new TestCase("hikaruvi", "Dan Ry", "d@mail.com", true));
+
+        testCases.add(new TestCase("hi", "Dan Ry", "d@mail.com", false));
+        testCases.add(new TestCase("hik", "Dan Ry", "d@mail.com", true));
+        testCases.add(new TestCase("hihihihihihihihihihik", "Dan Ry", "d@mail.com", false));
+        testCases.add(new TestCase("hihihihihihihihihihi", "Dan Ry", "d@mail.com", true));
+
+        testCases.add(new TestCase("hihihihihihihihihi", "Dan Ry", "dmail.com", false));
+        testCases.add(new TestCase("hihihihihihihihihi", "Dan Ry", "d@mailcom", false));
+
+        runTests(testCases);
+    }
+
+    public record TestCase(String username, String fullName, String email, boolean shouldPass) {
+        @Override
+        public String toString() {
+            return String.format("input values: %s, %s, %s; should pass: %b", username, fullName, email, shouldPass);
         }
+    }
+
+    static void runTests(List<TestCase> testCases, boolean verbose) {
+        int passed = 0;
+        int failed = 0;
+
+        for (int i = 0; i < testCases.size(); ++i) {
+            TestCase test = testCases.get(i);
+            if (verbose) {
+                System.out.printf("Test #%d: %s\n", i + 1, test.toString());
+            }
+
+            try {
+                User user = User.validate(test.username(), test.fullName(), test.email());
+
+                if (test.shouldPass()) {
+                    if (verbose) System.out.println("  Success: Created user: " + user.format());
+                    passed++;
+                } else {
+                    if (verbose) System.out.println("  Fail: Should be fail, but user created");
+                    failed++;
+                }
+            } catch (IllegalArgumentException e) {
+                if (test.shouldPass()) {
+                    if (verbose) System.out.println("  Fail: Should pass, but fail: " + e.getMessage());
+                    failed++;
+                } else {
+                    if (verbose) System.out.println("  Success: Success failed: " + e.getMessage());
+                    passed++;
+                }
+            }
+
+            if (verbose) System.out.println();
+        }
+
+        System.out.println("=== Test results ===");
+        System.out.println("Passed: " + passed);
+        System.out.println("Failed: " + failed);
+        System.out.println("All: " + testCases.size());
+    }
+
+    static void runTests(List<TestCase> testCases) {
+        runTests(testCases, false);
     }
 }
