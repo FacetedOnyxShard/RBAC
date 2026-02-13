@@ -2,9 +2,7 @@ package org.example;
 
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -40,6 +38,15 @@ public class Main {
         testCases.add(new TestCase("hihihihihihihihihi", "Dan Ry", "d@mailcom", false));
 
         runTests(testCases);
+
+        // Role
+//        Permission p1 = new Permission("READ", "users", "undefined");
+//        Permission p2 = new Permission("WRITE", "users", "undefined");
+//
+//        Set<Permission> ps = Set.of(p1, p2);
+//
+//        Role r = new Role("ADM", "super man", ps);
+//        System.out.println(r.format());
     }
 
     public record TestCase(String username, String fullName, String email, boolean shouldPass) {
