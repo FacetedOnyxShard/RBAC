@@ -55,11 +55,13 @@ public abstract class AbstractRoleAssignment implements RoleAssignment {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         String formattedDate = dateTime.format(formatter);
 
-        return String.format("""
+        String summaryBaseTemplate = """
                 [%s] %s assigned to %s by %s at %s
                 Reason: %s
                 Status: %s
-                """, assignmentType(), role.name,
+                """;
+
+        return String.format(summaryBaseTemplate, assignmentType(), role.name,
                 user.username(), metadata.assignedBy(),
                 formattedDate, metadata.reason(), isActive() ? "ACTIVE" : "INACTIVE"
                 );
