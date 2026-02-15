@@ -10,7 +10,7 @@ public class Role {
     String id;
     String name;
     String description;
-    Set<Permission> permissions = new HashSet<>();
+    Set<Permission> permissions;
 
     private static final Set<String> usedNames = new HashSet<>();
 
@@ -40,7 +40,11 @@ public class Role {
         this.id = "role_" + uuid;
         this.name = transformedName;
         this.description = description;
-        this.permissions = permissions == null ? new HashSet<>() : new HashSet<>(permissions);
+        this.permissions = permissions == null ? createDefaultSet() : permissions;
+    }
+
+    private static Set<Permission> createDefaultSet() {
+        return new HashSet<>();
     }
 
     public void addPermission(Permission permission) {
