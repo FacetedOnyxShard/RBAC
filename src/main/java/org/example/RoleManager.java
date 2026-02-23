@@ -5,10 +5,15 @@ import java.util.*;
 public class RoleManager implements Repository<Role> {
     private final Map<String, Role> rolesById; // ключ role.id
     private final Map<String, Role> rolesByNameIdx; // ключ role.name
+    private AssignmentManager assignmentManager;
 
     public RoleManager() {
         rolesById = new HashMap<>();
         rolesByNameIdx = new HashMap<>();
+    }
+
+    public void setAssignmentManager(AssignmentManager assignmentManager) {
+        this.assignmentManager = assignmentManager;
     }
 
     @Override
@@ -27,6 +32,10 @@ public class RoleManager implements Repository<Role> {
 
     @Override
     public boolean remove(Role item) {
+        if (!assignmentManager.findByRole(item).isEmpty()) {
+            return false;
+        }
+
         return rolesById.remove(item.id, item)
                 && rolesByNameIdx.remove(item.name, item);
     }
@@ -48,8 +57,10 @@ public class RoleManager implements Repository<Role> {
 
     @Override
     public void clear() {
-        rolesById.clear();
-        rolesByNameIdx.clear();
+        for (Role role : rolesById.values()) {
+            if (!this.remove(role))
+                throw new IllegalStateException();
+        }
     }
 
     public Optional<Role> findByName(String name) {
