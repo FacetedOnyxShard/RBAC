@@ -4,6 +4,9 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import org.junitpioneer.jupiter.*;
+import org.junitpioneer.jupiter.cartesian.CartesianTest;
+
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -108,14 +111,13 @@ public class TestManagers {
 
         @ParameterizedTest
         @CsvSource({
-                "byEmail, test@example.com",
-                "byEmailDomain, example.com",
-                "byFullNameContains, John",
-                "byUsername, johndoe",
-                "byUsernameContains, john",
+                "byEmail, dannil.rybkin@gmail.com",
+                "byEmailDomain, gmail.com",
+                "byFullNameContains, Rybkin",
+                "byUsername, hikaruvi",
+                "byUsernameContains, ar",
         })
         public void findByFilter_default(String filterName, String filterParameter) {
-
             UserFilter filter = createFilterWithParameter(filterName, filterParameter);
             List<User> expectedUsers = new ArrayList<>();
             for (int i = 0; i < 10; ++i) {
@@ -148,30 +150,6 @@ public class TestManagers {
             assertEquals(expectedValues, new HashSet<>(methodResult));
         }
 
-//        @ParameterizedTest
-//        @CsvSource({
-//                "UserFilters.byEmail()",
-//                "UserFilters.byEmailDomain()",
-//                "UserFilters.byFullNameContains()",
-//                "UserFilters.byUsername()",
-//                "UserFilters.byUsernameContains()",
-//        })
-//        public void findAll_twoParams_default() {
-//
-//            final int expectedSize = 10;
-//            Set<User> expectedValues = new HashSet<>();
-//            for (int i = 0; i < expectedSize; ++i) {
-//                User newUser = generateUser();
-//                expectedValues.add(newUser);
-//                userManager.add(newUser);
-//            }
-//
-//            List<User> methodResult = userManager.findAll();
-//
-//            assertEquals(expectedSize, userManager.count());
-//            assertEquals(expectedValues, new HashSet<>(methodResult));
-//        }
-
         @Test
         public void count_default() {
             final int expectedSize = random.nextInt(1, 1000);
@@ -201,6 +179,16 @@ public class TestManagers {
             assertEquals(0, countUsersAfterClear);
         }
 
+        @Test
+        public void add_duplicate_shouldThrowsIllegalArgumentException() {
+            User user = new User("hikaruvi", "Daniil Rybkin", "rybkin.daniil@gmail.com");
+            User userSameUsername = new User("hikaruvi", "Danil Kolbasenko", "kolbasenko.rulit@yandex.ru");
+
+            userManager.add(user);
+
+            assertThrows(IllegalArgumentException.class, () -> userManager.add(userSameUsername));
+        }
+
         private static final Random random = new Random();
         private static final String[] allowedUsernamePrefixes = {"hikaruvi", "maickaljacson", "abumba", "mister_ataka"};
         private static final String[] allowedNames = {"Daniil", "Michail", "Vitalik", "Oleg"};
@@ -221,11 +209,132 @@ public class TestManagers {
         }
     }
 
+
     @Nested
     public class TestRole {
         @Test
-        public void simpleTest() {
-            assertEquals(1 + 3, 4);
+        public void test_remove_default() {
+            RoleManager roleManager = new RoleManager();
+            AssignmentManager assignmentManager = new AssignmentManager();
+            roleManager.setAssignmentManager(assignmentManager);
+            Role role = new Role("CEO");
+
+
+            roleManager.add(role);
+
+
+            assertTrue(roleManager.remove(role));
+        }
+
+        @Test
+        public void test_remove_shouldReturnFalse() {
+            RoleManager roleManager = new RoleManager();
+            AssignmentManager assignmentManager = new AssignmentManager();
+            roleManager.setAssignmentManager(assignmentManager);
+
+            Role role = new Role("CEO");
+            User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
+            User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");
+            AssignmentMetadata metadata = AssignmentMetadata.now(supervisor.username(), "Delegate");
+
+            RoleAssignment permanentAssignment = new PermanentAssignment(subordinate, role, metadata);
+            assignmentManager.add(permanentAssignment);
+
+
+            roleManager.add(role);
+
+
+            assertFalse(roleManager.remove(role));
+        }
+
+        @Test
+        public void test_clear_shouldDoesNotThrow() {
+            RoleManager roleManager = new RoleManager();
+            AssignmentManager assignmentManager = new AssignmentManager();
+            roleManager.setAssignmentManager(assignmentManager);
+
+            Role main = new Role("CEO");
+            Role helper = new Role("Manager");
+            Role designer = new Role("UX/UI");
+            List<Role> roleList = new ArrayList<>(List.of(main, helper, designer));
+
+
+            for (Role role : roleList) {
+                roleManager.add(role);
+            }
+
+            assertDoesNotThrow(roleManager::clear);
+        }
+
+        @Test
+        public void test_clear_shouldThrowIllegalStateException() {
+            RoleManager roleManager = new RoleManager();
+            AssignmentManager assignmentManager = new AssignmentManager();
+            roleManager.setAssignmentManager(assignmentManager);
+
+            Role main = new Role("CEO");
+            Role helper = new Role("Manager");
+            Role designer = new Role("UX/UI");
+            List<Role> roleList = new ArrayList<>(List.of(main, helper, designer));
+
+            User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
+            User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");
+            AssignmentMetadata metadata = AssignmentMetadata.now(supervisor.username(), "Delegate");
+
+            RoleAssignment permanentAssignment = new PermanentAssignment(subordinate, main, metadata);
+            assignmentManager.add(permanentAssignment);
+
+
+            for (Role role : roleList) {
+                roleManager.add(role);
+            }
+
+            assertThrows(IllegalStateException.class, roleManager::clear);
+        }
+    }
+
+
+    @Nested
+    public class TestAssignment {
+        @Test
+        public void test_add_default() {
+            AssignmentManager assignmentManager = new AssignmentManager();
+            UserManager userManager = new UserManager();
+            RoleManager roleManager = new RoleManager();
+            assignmentManager.setUserManager(userManager);
+            assignmentManager.setRoleManager(roleManager);
+
+            Role role = new Role("Frontend Developer");
+            roleManager.add(role);
+
+            User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
+            User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");
+            userManager.add(supervisor);
+            userManager.add(subordinate);
+
+            AssignmentMetadata metadata = AssignmentMetadata.now(supervisor.username(), "Delegate");
+
+            RoleAssignment permanentAssignment = new PermanentAssignment(subordinate, role, metadata);
+
+            assertDoesNotThrow(() -> assignmentManager.add(permanentAssignment));
+        }
+
+        @Test
+        public void test_add_ThrowsError() {
+            AssignmentManager assignmentManager = new AssignmentManager();
+            UserManager userManager = new UserManager();
+            RoleManager roleManager = new RoleManager();
+            assignmentManager.setUserManager(userManager);
+            assignmentManager.setRoleManager(roleManager);
+
+            Role role = new Role("Frontend Developer");
+            User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
+            User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");
+            AssignmentMetadata metadata = AssignmentMetadata.now(supervisor.username(), "Delegate");
+
+            RoleAssignment permanentAssignment = new PermanentAssignment(subordinate, role, metadata);
+
+            assertThrows(IllegalArgumentException.class, () -> assignmentManager.add(permanentAssignment));
         }
     }
 }
