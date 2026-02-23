@@ -5,9 +5,19 @@ import java.util.*;
 
 public class AssignmentManager implements Repository<RoleAssignment> {
     Map<String, RoleAssignment> assignments; // (ключ — assignmentId)
+    private UserManager userManager;
+    private RoleManager roleManager;
 
     public AssignmentManager() {
         this.assignments = new HashMap<>();
+    }
+
+    public void setUserManager(UserManager userManager) {
+        this.userManager = userManager;
+    }
+
+    public void setRoleManager(RoleManager roleManager) {
+        this.roleManager = roleManager;
     }
 
     @Override
@@ -16,6 +26,16 @@ public class AssignmentManager implements Repository<RoleAssignment> {
         if (assignments.containsKey(item.assignmentId())) {
             throw new IllegalArgumentException("Duplicate");
         }
+        Optional<User> optionalUser =  userManager.findByUsername(item.user().username());
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        Optional<Role> optionalRole = roleManager.findById(item.role().id);
+        if (optionalRole.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
+
         assignments.put(item.assignmentId(), item);
     }
 
