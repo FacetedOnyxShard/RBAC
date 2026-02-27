@@ -6,6 +6,17 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
+        testScanner();
+    }
+
+    private static void testScanner() {
+        Scanner scanner = new Scanner("print Hello, Wolrd!");
+        while (scanner.hasNext()) {
+            System.out.println(scanner.next());
+        }
+    }
+
+    private static void testFromFirstTask() {
         // User
         User user1 = User.validate("hikaruvi", "Daniil Rybkin", "daniil@gmail.com");
         User user2 = User.validate("hikaruvi", "Daniil Rybkin", "daniil@gmail.com");
@@ -40,13 +51,13 @@ public class Main {
         runTests(testCases);
 
         // Role
-//        Permission p1 = new Permission("READ", "users", "undefined");
-//        Permission p2 = new Permission("WRITE", "users", "undefined");
-//
-//        Set<Permission> ps = Set.of(p1, p2);
-//
-//        Role r = new Role("ADM", "super man", ps);
-//        System.out.println(r.format());
+        Permission p1 = new Permission("READ", "users", "undefined");
+        Permission p2 = new Permission("WRITE", "users", "undefined");
+
+        Set<Permission> ps = Set.of(p1, p2);
+
+        Role r = new Role("ADM", "super man", ps);
+        System.out.println(r.format());
     }
 
     public record TestCase(String username, String fullName, String email, boolean shouldPass) {
