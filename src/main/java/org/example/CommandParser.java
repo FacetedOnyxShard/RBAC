@@ -19,6 +19,9 @@ public class CommandParser {
     }
 
     void executeCommand(String commandName, Scanner scanner, RBACSystem system) {
+        if (!commands.containsKey(commandName)) {
+            throw new IllegalArgumentException();
+        }
         commands.get(commandName).execute(scanner, system);
     }
 
