@@ -6,7 +6,17 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        testScanner();
+        testCommands();
+    }
+
+    private static void testCommands() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Введите строку:");
+        String text = scanner.nextLine();
+        System.out.println("Введите число:");
+        int num = scanner.nextInt();
+
+        System.out.println("Вы ввели " + text + " " + num);
     }
 
     private static void testScanner() {

@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class CommandParser {
-    Map<String, Command> commands;
-    Map<String, String> commandDescriptions;
+    private final Map<String, Command> commands;
+    private final Map<String, String> commandDescriptions;
 
     CommandParser() {
         commands = new HashMap<>();
@@ -36,7 +36,8 @@ public class CommandParser {
     }
 
     void parseAndExecute(String input, Scanner scanner, RBACSystem system) {
-        String commandName = scanner.next();
+        String[] parts = input.split("\\s+", 2);
+        String commandName = parts[0];
         commands.get(commandName).execute(scanner, system);
     }
 }
