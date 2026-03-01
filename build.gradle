@@ -16,6 +16,9 @@ dependencies {
 
     // Source: https://mvnrepository.com/artifact/org.junit-pioneer/junit-pioneer
     testImplementation 'org.junit-pioneer:junit-pioneer:2.3.0'
+
+    // Source: https://mvnrepository.com/artifact/de.vandermeer/asciitable
+    implementation 'de.vandermeer:asciitable:0.3.2'
 }
 
 test {
