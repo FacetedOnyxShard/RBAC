@@ -1,14 +1,13 @@
 package org.example;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class CommandRegistry {
-    private final CommandParser parser  = new CommandParser();
-
     public CommandRegistry() {
+        final CommandParser parser  = new CommandParser();
+
         new UserCommands(parser);
         new RoleCommands(parser);
         new AssignmentCommands(parser);
@@ -217,8 +216,10 @@ public class CommandRegistry {
                     "вывести список всех ролей",
                     (scanner, system) -> {
                         System.out.println("Список ролей:");
+                        int n = 1;
                         for (Role role : system.roleManager.findAll()) {
-                            System.out.println(role.toString() + " " + role.getPermissions().size());
+                            System.out.printf("\t%d. %s %d", n, role.toString(), role.getPermissions().size());
+                            ++n;
                         }
                     });
 
@@ -369,7 +370,7 @@ public class CommandRegistry {
 
                         System.out.println("Введите номер права для удаления:");
                         int permissionForRemoveNumber = scanner.nextInt();
-                        if (1 <= permissionForRemoveNumber && permissionForRemoveNumber >= permissions.length) {
+                        if (1 <= permissionForRemoveNumber && permissionForRemoveNumber <= permissions.length) {
                             int removeIdx = permissionForRemoveNumber - 1;
                             role.removePermission(permissions[removeIdx]);
                         } else {
@@ -423,7 +424,45 @@ public class CommandRegistry {
             parser.registerCommand("assign-role",
                     "назначить роль пользователю",
                     (scanner, system) -> {
-                        // TODO: Implement assign-role command
+                        String username;
+                        System.out.println("Введите username:");
+                        username = scanner.nextLine();
+
+                        parser.executeCommand("role-list", scanner, system);
+                        System.out.println("Введите номер желаемой роли:");
+                        int selectedRoleNumber = scanner.nextInt();
+                        int selectedRoleIdx = selectedRoleNumber - 1;
+
+                        System.out.println("Выберите тип назначения (0 - постоянное, 1 - временное):");
+                        boolean selectedAssignmentType = scanner.nextBoolean();
+
+                        String expirationDate = null;
+                        if (selectedAssignmentType) {
+                            System.out.println("Введите дату истечения");
+                            expirationDate = scanner.nextLine();
+                        }
+
+                        System.out.println("Укажите причину назначения");
+                        String reason = scanner.nextLine();
+
+                        AbstractRoleAssignment newAssignment;
+                        AssignmentMetadata metadata = AssignmentMetadata.now(system.currentUser, reason);
+                        List<Role> roleList = system.roleManager.findAll();
+
+                        Optional<User> optionalUser = system.userManager.findByUsername(username);
+                        if (optionalUser.isEmpty()) {
+                            System.out.println("Ошибка: не удалось найти пользователя с username = " + username);
+                            return;
+                        }
+                        User user = optionalUser.get();
+                        Role selectedRole = roleList.get(selectedRoleIdx);
+
+                        if (selectedAssignmentType) {
+                            newAssignment = new TemporaryAssignment(user, selectedRole, metadata, expirationDate, false);
+                        } else {
+                            newAssignment = new PermanentAssignment(user, selectedRole, metadata);
+                        }
+                        system.assignmentManager.add(newAssignment);
                     });
 
             parser.registerCommand("revoke-role",
