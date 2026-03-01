@@ -10,6 +10,10 @@ public class CommandRegistry {
 
     public CommandRegistry() {
         new UserCommands(parser);
+        new RoleCommands(parser);
+        new AssignmentCommands(parser);
+        new PermissionCommands(parser);
+        new UtilityCommands(parser);
     }
 
     private static class UserCommands {
@@ -204,6 +208,327 @@ public class CommandRegistry {
         private static String get(Field field, Scanner scanner) {
             System.out.println(field.getMessage());
             return scanner.nextLine();
+        }
+    }
+
+    private static class RoleCommands {
+        public RoleCommands(CommandParser parser) {
+            parser.registerCommand("role-list",
+                    "вывести список всех ролей",
+                    (scanner, system) -> {
+                        System.out.println("Список ролей:");
+                        for (Role role : system.roleManager.findAll()) {
+                            System.out.println(role.toString() + " " + role.getPermissions().size());
+                        }
+                    });
+
+            parser.registerCommand("role-create",
+                    "создать новую роль",
+                    (scanner, system) -> {
+                        Role newRole;
+                        while (true) {
+                            try {
+                                String name = getName(scanner);
+                                String description = getDescription(scanner);
+
+                                newRole = new Role(name, description);
+                                system.roleManager.add(newRole);
+
+                                while(prompt(scanner, "Хотите добавить новое право")) {
+                                    parser.executeCommand("role-add-permission", scanner, system);
+                                }
+                                break;
+                            } catch (Exception e) {
+                                System.out.println("Не удалось создать роль. Ошибка " + e.getMessage());
+                                continue;
+                            }
+                        }
+                    });
+
+            parser.registerCommand("role-view",
+                    "просмотр роли",
+                    (scanner, system) -> {
+                        String name = getName(scanner);
+
+                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        if (optionalRole.isEmpty()) {
+                            System.out.println("Роль с именем " + name + " не была найдена");
+                            return;
+                        }
+
+                        Role role = optionalRole.get();
+                        System.out.println(role.format());
+                    });
+
+            parser.registerCommand("role-update",
+                    "обновить роль (название/описание)",
+                    (scanner, system) -> {
+                        String name = getName(scanner);
+                        String description = getDescription(scanner);
+
+                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        if (optionalRole.isEmpty()) {
+                            System.out.println("Роль с именем " + name + " не была найдена");
+                            return;
+                        }
+
+                        Role role = optionalRole.get();
+                        role.name = name;
+                        role.description = description;
+                    });
+
+            parser.registerCommand("role-delete",
+                    "удалить роль",
+                    (scanner, system) -> {
+                        String name = getName(scanner);
+
+                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        if (optionalRole.isEmpty()) {
+                            System.out.println("Роль с именем " + name + " не была найдена");
+                            return;
+                        }
+
+                        Role role = optionalRole.get();
+
+                        List<RoleAssignment> roleAssignmentList = system.assignmentManager.findByRole(role);
+
+                        if (!roleAssignmentList.isEmpty()) {
+                            System.out.println("Не удалось удалить роль. Причина: она назначена пользователям");
+                            System.out.println("Список пользователей, которым она назначена:");
+                            int i = 1;
+                            for (RoleAssignment roleAssignment : roleAssignmentList) {
+                                System.out.println("\t" + i + ". " + roleAssignment.user());
+                                ++i;
+                            }
+                            return;
+                        }
+
+                        if (prompt(scanner)) {
+                            system.roleManager.remove(role);
+                            System.out.println("Роль успешно удалена");
+                        } else {
+                            System.out.println("Отмена удаления роли...");
+                        }
+                    });
+
+            parser.registerCommand("role-add-permission",
+                    "добавить право к роли",
+                    (scanner, system) -> {
+                        String name = getName(scanner);
+
+                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        if (optionalRole.isEmpty()) {
+                            System.out.println("Роль с именем " + name + " не была найдена");
+                            return;
+                        }
+
+                        Role role = optionalRole.get();
+                        Permission permission;
+
+                        while (true) {
+                            System.out.println("Введите данные права");
+                            System.out.println("Имя:");
+                            String permissionName = scanner.nextLine();
+                            System.out.println("Ресурс:");
+                            String resource = scanner.nextLine();
+                            System.out.println("Описание:");
+                            String description = scanner.nextLine();
+
+                            try {
+                                permission = new Permission(permissionName, resource, description);
+                                break;
+                            } catch (Exception e) {
+                                System.out.println("Не удалось создать роль. Ошибка: " + e.getMessage());
+                                continue;
+                            }
+                        }
+
+
+                        system.roleManager.addPermissionToRole(role.name, permission);
+                    });
+
+            parser.registerCommand("role-remove-permission",
+                    "удалить право из роли",
+                    (scanner, system) -> {
+                        String name = getName(scanner);
+
+                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        if (optionalRole.isEmpty()) {
+                            System.out.println("Роль с именем " + name + " не была найдена");
+                            return;
+                        }
+
+                        Role role = optionalRole.get();
+                        Permission[] permissions = role.getPermissions().toArray(new Permission[0]);
+                        int i = 1;
+                        System.out.println("Права роли:");
+                        for (Permission permission: permissions) {
+                            System.out.printf("\t%d. %s", i, permission.format());
+                            ++i;
+                        }
+
+                        System.out.println("Введите номер права для удаления:");
+                        int permissionForRemoveNumber = scanner.nextInt();
+                        if (1 <= permissionForRemoveNumber && permissionForRemoveNumber >= permissions.length) {
+                            int removeIdx = permissionForRemoveNumber - 1;
+                            role.removePermission(permissions[removeIdx]);
+                        } else {
+                            System.out.println("Выбран некорректный номер");
+                        }
+                    });
+
+            parser.registerCommand("role-search",
+                    "поиск ролей",
+                    (scanner, system) -> {
+                        String name = getName(scanner);
+
+                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        if (optionalRole.isEmpty()) {
+                            System.out.println("Роль с именем " + name + " не была найдена");
+                            return;
+                        }
+
+                        Role role = optionalRole.get();
+                    });
+        }
+
+        private static boolean prompt(Scanner scanner, String question) {
+            if (question == null) {
+                return prompt(scanner);
+            }
+            System.out.println(question + " да/нет?");
+            String answer = scanner.nextLine().trim();
+            return answer.equals("да");
+        }
+
+        private static boolean prompt(Scanner scanner) {
+            System.out.println("Вы уверены да/нет?");
+            String answer = scanner.nextLine().trim();
+            return answer.equals("да");
+        }
+
+        private static String getName(Scanner scanner) {
+            System.out.println("Введите название роли: ");
+            return scanner.nextLine();
+        }
+
+        private static String getDescription(Scanner scanner) {
+            System.out.println("Введите описание роли:");
+            return scanner.nextLine();
+        }
+    }
+
+    private static class AssignmentCommands {
+        public AssignmentCommands(CommandParser parser) {
+            parser.registerCommand("assign-role",
+                    "назначить роль пользователю",
+                    (scanner, system) -> {
+                        // TODO: Implement assign-role command
+                    });
+
+            parser.registerCommand("revoke-role",
+                    "отозвать роль у пользователя",
+                    (scanner, system) -> {
+                        // TODO: Implement revoke-role command
+                    });
+
+            parser.registerCommand("assignment-list",
+                    "список всех назначений",
+                    (scanner, system) -> {
+                        // TODO: Implement assignment-list command
+                    });
+
+            parser.registerCommand("assignment-list-user",
+                    "назначения конкретного пользователя",
+                    (scanner, system) -> {
+                        // TODO: Implement assignment-list-user command
+                    });
+
+            parser.registerCommand("assignment-list-role",
+                    "список пользователей с конкретной ролью",
+                    (scanner, system) -> {
+                        // TODO: Implement assignment-list-role command
+                    });
+
+            parser.registerCommand("assignment-active",
+                    "только активные назначения",
+                    (scanner, system) -> {
+                        // TODO: Implement assignment-active command
+                    });
+
+            parser.registerCommand("assignment-expired",
+                    "истёкшие временные назначения",
+                    (scanner, system) -> {
+                        // TODO: Implement assignment-expired command
+                    });
+
+            parser.registerCommand("assignment-extend",
+                    "продлить временное назначение",
+                    (scanner, system) -> {
+                        // TODO: Implement assignment-extend command
+                    });
+
+            parser.registerCommand("assignment-search",
+                    "поиск назначений по фильтрам",
+                    (scanner, system) -> {
+                        // TODO: Implement assignment-search command
+                    });
+        }
+    }
+
+    private static class PermissionCommands {
+        public PermissionCommands(CommandParser parser) {
+            parser.registerCommand("permissions-user",
+                    "все права конкретного пользователя",
+                    (scanner, system) -> {
+                        // TODO: Implement permissions-user command
+                    });
+
+            parser.registerCommand("permissions-check",
+                    "проверить, есть ли у пользователя конкретное право",
+                    (scanner, system) -> {
+                        // TODO: Implement permissions-check command
+                    });
+        }
+    }
+
+    private static class UtilityCommands {
+        public UtilityCommands(CommandParser parser) {
+            parser.registerCommand("help",
+                    "справка по командам",
+                    (scanner, system) -> {
+                        // TODO: Implement help command (using CommandParser.printHelp())
+                    });
+
+            parser.registerCommand("stats",
+                    "статистика системы",
+                    (scanner, system) -> {
+                        // TODO: Implement stats command (using RBACSystem.generateStatistics())
+                    });
+
+            parser.registerCommand("clear",
+                    "очистить экран",
+                    (scanner, system) -> {
+                        // TODO: Implement clear command
+                    });
+
+            parser.registerCommand("exit",
+                    "выход из программы",
+                    (scanner, system) -> {
+                        // TODO: Implement exit command
+                    });
+
+            parser.registerCommand("save",
+                    "сохранить данные в файл",
+                    (scanner, system) -> {
+                        // TODO: Implement save command
+                    });
+
+            parser.registerCommand("load",
+                    "загрузить данные из файла",
+                    (scanner, system) -> {
+                        // TODO: Implement load command
+                    });
         }
     }
 }

@@ -42,6 +42,10 @@ public class RBACSystem {
         roleManager = new RoleManager();
         assignmentManager = new AssignmentManager();
 
+        roleManager.setAssignmentManager(assignmentManager);
+        assignmentManager.setRoleManager(roleManager);
+        assignmentManager.setUserManager(userManager);
+
 
         Role admin = new Role("Admin", "manages everything");
         Permission adminCreateUsers = new Permission("CREATE", "users", "admin crud");

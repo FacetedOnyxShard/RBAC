@@ -10,13 +10,10 @@ public class Main {
     }
 
     private static void testCommands() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Введите строку:");
-        String text = scanner.nextLine();
-        System.out.println("Введите число:");
-        int num = scanner.nextInt();
-
-        System.out.println("Вы ввели " + text + " " + num);
+        int i = 1;
+        String str = "hello";
+        System.out.println("Список:");
+        System.out.printf("\t%d. %s", i, str);
     }
 
     private static void testScanner() {
