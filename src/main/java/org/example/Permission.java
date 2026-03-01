@@ -1,13 +1,7 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 public record Permission(String name, String resource, String description) {
-    private static final Set<String> ALLOWED_NAMES = Set.of("READ", "WRITE", "DELETE");
-
     public Permission(String name, String resource, String description) {
         String transformedName = name.trim().toUpperCase();
         String transformedResource = resource.trim().toLowerCase();
@@ -15,10 +9,6 @@ public record Permission(String name, String resource, String description) {
 
         if (transformedName.contains(" ")) {
             throw new IllegalArgumentException("Name must not contain spaces");
-        }
-
-        if (!ALLOWED_NAMES.contains(transformedName)) {
-            throw new IllegalArgumentException("Name must be in allowed name range: " + ALLOWED_NAMES);
         }
 
         if (transformedDescription.isBlank()) {
