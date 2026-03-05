@@ -10,7 +10,7 @@ public class AssignmentSorters {
     }
 
     Comparator<RoleAssignment> byRoleName() {
-        return Comparator.comparing(roleAssignment -> roleAssignment.role().name,
+        return Comparator.comparing(roleAssignment -> roleAssignment.role().getName(),
                 Comparator.nullsLast(String::compareTo));
     }
 

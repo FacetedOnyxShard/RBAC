@@ -30,7 +30,7 @@ public class AssignmentManager implements Repository<RoleAssignment> {
         if (optionalUser.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        Optional<Role> optionalRole = roleManager.findById(item.role().id);
+        Optional<Role> optionalRole = roleManager.findById(item.role().getId());
         if (optionalRole.isEmpty()) {
             throw new IllegalArgumentException();
         }

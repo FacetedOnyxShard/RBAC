@@ -22,12 +22,12 @@ public class RoleManager implements Repository<Role> {
             throw new IllegalArgumentException();
         }
 
-        if (rolesByNameIdx.containsKey(item.name)) {
+        if (rolesByNameIdx.containsKey(item.getName())) {
             throw new IllegalArgumentException();
         }
 
-        rolesById.put(item.id, item);
-        rolesByNameIdx.put(item.name, item);
+        rolesById.put(item.getId(), item);
+        rolesByNameIdx.put(item.getName(), item);
     }
 
     @Override
@@ -36,8 +36,8 @@ public class RoleManager implements Repository<Role> {
             return false;
         }
 
-        return rolesById.remove(item.id, item)
-                && rolesByNameIdx.remove(item.name, item);
+        return rolesById.remove(item.getId(), item)
+                && rolesByNameIdx.remove(item.getName(), item);
     }
 
     @Override

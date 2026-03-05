@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 public class RoleSorters {
     Comparator<Role> byName() {
-        return Comparator.comparing(role -> role.name,
+        return Comparator.comparing(Role::getName,
                 Comparator.nullsLast(String::compareTo));
     }
 

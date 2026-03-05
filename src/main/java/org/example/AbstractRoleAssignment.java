@@ -61,7 +61,7 @@ public abstract class AbstractRoleAssignment implements RoleAssignment {
                 Status: %s
                 """;
 
-        return String.format(summaryBaseTemplate, assignmentType(), role.name,
+        return String.format(summaryBaseTemplate, assignmentType(), role.getName(),
                 user.username(), metadata.assignedBy(),
                 formattedDate, metadata.reason(), isActive() ? "ACTIVE" : "INACTIVE"
                 );

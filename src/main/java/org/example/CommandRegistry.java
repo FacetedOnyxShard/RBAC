@@ -277,8 +277,8 @@ public class CommandRegistry {
                         }
 
                         Role role = optionalRole.get();
-                        role.name = name;
-                        role.description = description;
+                        role.setName(name);
+                        role.setDescription(description);
                     });
 
             parser.registerCommand("role-delete",
@@ -348,7 +348,7 @@ public class CommandRegistry {
                         }
 
 
-                        system.roleManager.addPermissionToRole(role.name, permission);
+                        system.roleManager.addPermissionToRole(role.getName(), permission);
                     });
 
             parser.registerCommand("role-remove-permission",
@@ -678,10 +678,10 @@ public class CommandRegistry {
                         User user = optionalUser.get();
 
                         if (system.assignmentManager.userHasPermission(user, permissionName, resource)) {
-                            System.out.println("YES. " );
+                            System.out.println("YES. ");
                             for (RoleAssignment a : system.assignmentManager.findByFilter(AssignmentFilters.byUser(user))) {
                                 if (a.role().hasPermission(permissionName, resource)) {
-                                    System.out.println("Из роли: " + a.role().name);
+                                    System.out.println("Из роли: " + a.role().getName());
                                     break;
                                 }
                             }
@@ -703,7 +703,7 @@ public class CommandRegistry {
             parser.registerCommand("stats",
                     "статистика системы",
                     (scanner, system) -> {
-                        system.generateStatistics();
+                        System.out.println(system.generateStatistics());
                     });
 
             parser.registerCommand("clear",

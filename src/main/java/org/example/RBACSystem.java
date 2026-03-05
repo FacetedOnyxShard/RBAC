@@ -26,7 +26,7 @@ public class RBACSystem {
         this.currentUser = currentUser;
     }
 
-    String generateStatistics() {
+    public String generateStatistics() {
         return String.format(
                         """
                         REPORT:
@@ -67,19 +67,19 @@ public class RBACSystem {
         PermanentAssignment firstAdminAssignment = new PermanentAssignment(adminUser, admin, adminMetadata);
 
         roleManager.add(admin);
-        String adminName = admin.name;
+        String adminName = admin.getName();
         roleManager.addPermissionToRole(adminName, adminCreateUsers);
         roleManager.addPermissionToRole(adminName, adminUpdateUsersData);
         roleManager.addPermissionToRole(adminName, adminReadUsersData);
         roleManager.addPermissionToRole(adminName, adminDeleteUsers);
 
         roleManager.add(manager);
-        String managerName = manager.name;
+        String managerName = manager.getName();
         roleManager.addPermissionToRole(managerName, managerUpdateSettings);
         roleManager.addPermissionToRole(managerName, managerReadReports);
 
         roleManager.add(viewer);
-        String viewerName = viewer.name;
+        String viewerName = viewer.getName();
         roleManager.addPermissionToRole(viewerName, viewerReadReports);
 
 

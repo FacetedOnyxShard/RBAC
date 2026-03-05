@@ -2,11 +2,11 @@ package org.example;
 
 public abstract class RoleFilters implements RoleFilter {
     public static RoleFilter byName(String name) {
-        return role -> role.name.equals(name);
+        return role -> role.getName().equals(name);
     }
 
     public static RoleFilter byNameContains(String substring) {
-        return role -> role.name.contains(substring);
+        return role -> role.getName().contains(substring);
     }
 
     public static RoleFilter hasPermission(Permission permission) {

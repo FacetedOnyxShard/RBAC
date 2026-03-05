@@ -17,7 +17,7 @@ public abstract class AssignmentFilters implements AssignmentFilter {
     }
 
     public static AssignmentFilter byRoleName(String roleName) {
-        return assignment -> assignment.role().name.equals(roleName);
+        return assignment -> assignment.role().getName().equals(roleName);
     }
 
     public static AssignmentFilter activeOnly() {
