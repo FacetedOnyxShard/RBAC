@@ -29,6 +29,12 @@ public class Main {
     private static void programInterface() {
 //        почему-то не работает поиск по домену.
 //        Вывод: Ошибка: null
+//        При этом user-search нормально ищет по домену
+
+//        остановился на role-search. нужно добавить поиск по:
+//        Название роли (содержит)
+//        По наличию конкретного права
+//        По минимальному количеству прав
 
         RBACSystem system = new RBACSystem();
         system.initialize();
