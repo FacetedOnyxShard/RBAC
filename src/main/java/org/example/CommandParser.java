@@ -36,8 +36,8 @@ public class CommandParser {
     }
 
     void parseAndExecute(String input, Scanner scanner, RBACSystem system) {
-        String[] parts = input.split("\\s+", 2);
-        String commandName = parts[0];
+        String[] tokens = input.split("\\s+");
+        String commandName = tokens[0];
         commands.get(commandName).execute(scanner, system);
     }
 }

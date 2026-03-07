@@ -8,9 +8,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class CommandRegistry {
-    public CommandRegistry() {
-        final CommandParser parser = new CommandParser();
-
+    public CommandRegistry(CommandParser parser) {
         new UserCommands(parser);
         new RoleCommands(parser);
         new AssignmentCommands(parser);
@@ -52,7 +50,6 @@ public class CommandRegistry {
                                 break;
                             } catch (Exception e) {
                                 System.out.println("Не получилось создать пользователя. Ошибка: " + e.getMessage());
-                                continue;
                             }
                         }
 
@@ -107,7 +104,6 @@ public class CommandRegistry {
                                 break;
                             } catch (Exception e) {
                                 System.out.println("Не удалось обновить пользователя. Ошибка " + e.getMessage());
-                                continue;
                             }
                         }
                     });
@@ -244,7 +240,6 @@ public class CommandRegistry {
                                 break;
                             } catch (Exception e) {
                                 System.out.println("Не удалось создать роль. Ошибка " + e.getMessage());
-                                continue;
                             }
                         }
                     });
@@ -343,7 +338,6 @@ public class CommandRegistry {
                                 break;
                             } catch (Exception e) {
                                 System.out.println("Не удалось создать роль. Ошибка: " + e.getMessage());
-                                continue;
                             }
                         }
 
@@ -393,6 +387,7 @@ public class CommandRegistry {
                         }
 
                         Role role = optionalRole.get();
+                        System.out.println(role.toString());
                     });
         }
 
@@ -717,6 +712,8 @@ public class CommandRegistry {
                     "выход из программы",
                     (scanner, system) -> {
                         scanner.close();
+                        System.out.println("Остановка выполнения программы...");
+                        System.exit(0);
                     });
         }
     }
