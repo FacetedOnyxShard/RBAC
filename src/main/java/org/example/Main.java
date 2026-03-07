@@ -1,5 +1,6 @@
 package org.example;
 
+import org.antlr.v4.parse.v4ParserException;
 import org.example.command.CommandParser;
 import org.example.command.CommandRegistry;
 import org.example.role.Role;
@@ -7,10 +8,28 @@ import org.example.user.User;
 import org.example.core.Permission;
 import org.example.core.RBACSystem;
 
+import java.lang.reflect.Field;
+import java.text.ParseException;
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
+        programInterface();
+    }
+
+    private static void test() {
+        Scanner scanner1 = new Scanner("user-list --username hikaruvi --email yes@gmail.com");
+        String command = "user-list\n";
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.next();
+        scanner.skip("\n\r");
+        System.out.println(scanner.hasNext());
+    }
+
+    private static void programInterface() {
+//        почему-то не работает поиск по домену.
+//        Вывод: Ошибка: null
+
         RBACSystem system = new RBACSystem();
         system.initialize();
 
@@ -18,13 +37,14 @@ public class Main {
         new CommandRegistry(parser);
 
         Scanner scanner = new Scanner(System.in);
-        boolean initialInfoShowed = false;
+        System.out.println("""
+                        ==================================
+                        Информация для новых пользователей
+                        ==================================
+                        help - список доступных команд,
+                        exit - выход
+                        """);
         while (true) {
-            if (!initialInfoShowed) {
-                System.out.println("Информация для новых пользователей\nhelp - список доступных команд,\nexit - выход\n");
-                initialInfoShowed = true;
-            }
-
             System.out.println("Введите команду:");
             try {
                 String input = scanner.nextLine();
@@ -34,13 +54,6 @@ public class Main {
             }
 
             System.out.println("\n");
-        }
-    }
-
-    private static void testScanner() {
-        Scanner scanner = new Scanner("print Hello, Wolrd!");
-        while (scanner.hasNext()) {
-            System.out.println(scanner.next());
         }
     }
 

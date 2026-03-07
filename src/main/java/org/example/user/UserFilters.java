@@ -14,6 +14,10 @@ public abstract class UserFilters implements UserFilter {
         return user->user.email().equals(email);
     }
 
+    public static UserFilter byEmailContains(String email) {
+        return user->user.email().contains(email);
+    }
+
     public static UserFilter byEmailDomain(String domain) {
         return user -> {
             String[] parts = user.email().split("@");

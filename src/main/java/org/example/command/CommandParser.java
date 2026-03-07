@@ -2,6 +2,8 @@ package org.example.command;
 
 import org.example.core.RBACSystem;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -38,8 +40,12 @@ public class CommandParser {
     }
 
     public void parseAndExecute(String input, Scanner scanner, RBACSystem system) {
-        String[] tokens = input.split("\\s+");
+        String[] tokens = input.split("\\s+", 2);
+
         String commandName = tokens[0];
-        commands.get(commandName).execute(scanner, system);
+        String arguments = tokens.length > 1 ? tokens[1] : "";
+
+        Scanner commandArgs = new Scanner(arguments);
+        commands.get(commandName).execute(commandArgs, system);
     }
 }
