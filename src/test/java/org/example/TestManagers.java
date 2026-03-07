@@ -17,12 +17,12 @@ public class TestManagers {
         private UserManager userManager;
 
         @BeforeEach
-        void beforeA() {
+        void beforeE() {
             userManager = new UserManager();
         }
 
         @AfterEach
-        void afterA() {
+        void afterE() {
             userManager.clear();
         }
 
@@ -212,11 +212,29 @@ public class TestManagers {
 
     @Nested
     public class TestRole {
+        RoleManager roleManager;
+        AssignmentManager assignmentManager;
+        UserManager userManager;
+
+        @BeforeEach
+        public void beforeE() {
+            roleManager = new RoleManager();
+            assignmentManager = new AssignmentManager();
+            userManager = new UserManager();
+
+            roleManager.setAssignmentManager(assignmentManager);
+            assignmentManager.setRoleManager(roleManager);
+            assignmentManager.setUserManager(userManager);
+        }
+
+        @AfterEach
+        public void afterE() {
+            roleManager.clear();
+            assignmentManager.clear();
+        }
+
         @Test
         public void test_remove_default() {
-            RoleManager roleManager = new RoleManager();
-            AssignmentManager assignmentManager = new AssignmentManager();
-            roleManager.setAssignmentManager(assignmentManager);
             Role role = new Role("CEO");
 
 
@@ -228,10 +246,6 @@ public class TestManagers {
 
         @Test
         public void test_remove_shouldReturnFalse() {
-            RoleManager roleManager = new RoleManager();
-            AssignmentManager assignmentManager = new AssignmentManager();
-            roleManager.setAssignmentManager(assignmentManager);
-
             Role role = new Role("CEO");
             User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
             User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");
@@ -249,29 +263,22 @@ public class TestManagers {
 
         @Test
         public void test_clear_shouldDoesNotThrow() {
-            RoleManager roleManager = new RoleManager();
-            AssignmentManager assignmentManager = new AssignmentManager();
-            roleManager.setAssignmentManager(assignmentManager);
-
             Role main = new Role("CEO");
             Role helper = new Role("Manager");
             Role designer = new Role("UX/UI");
-            List<Role> roleList = new ArrayList<>(List.of(main, helper, designer));
+            List<Role> roleList = List.of(main, helper, designer);
 
 
-            for (Role role : roleList) {
-                roleManager.add(role);
+            for (int i = 0; i < roleList.size(); ++i) {
+                roleManager.add(roleList.get(i));
             }
+
 
             assertDoesNotThrow(roleManager::clear);
         }
 
         @Test
         public void test_clear_shouldThrowIllegalStateException() {
-            RoleManager roleManager = new RoleManager();
-            AssignmentManager assignmentManager = new AssignmentManager();
-            roleManager.setAssignmentManager(assignmentManager);
-
             Role main = new Role("CEO");
             Role helper = new Role("Manager");
             Role designer = new Role("UX/UI");
@@ -289,6 +296,7 @@ public class TestManagers {
                 roleManager.add(role);
             }
 
+
             assertThrows(IllegalStateException.class, roleManager::clear);
         }
     }
@@ -296,14 +304,30 @@ public class TestManagers {
 
     @Nested
     public class TestAssignment {
-        @Test
-        public void test_add_default() {
-            AssignmentManager assignmentManager = new AssignmentManager();
-            UserManager userManager = new UserManager();
-            RoleManager roleManager = new RoleManager();
+        private AssignmentManager assignmentManager;
+        private UserManager userManager;
+        private RoleManager roleManager;
+
+        @BeforeEach
+        public void beforeE() {
+            assignmentManager = new AssignmentManager();
+            userManager = new UserManager();
+            roleManager = new RoleManager();
+
             assignmentManager.setUserManager(userManager);
             assignmentManager.setRoleManager(roleManager);
+            roleManager.setAssignmentManager(assignmentManager);
+        }
 
+        @AfterEach
+        public void afterE() {
+            assignmentManager.clear();
+            userManager.clear();
+            roleManager.clear();
+        }
+
+        @Test
+        public void test_add_default() {
             Role role = new Role("Frontend Developer");
             roleManager.add(role);
 
@@ -321,12 +345,6 @@ public class TestManagers {
 
         @Test
         public void test_add_ThrowsError() {
-            AssignmentManager assignmentManager = new AssignmentManager();
-            UserManager userManager = new UserManager();
-            RoleManager roleManager = new RoleManager();
-            assignmentManager.setUserManager(userManager);
-            assignmentManager.setRoleManager(roleManager);
-
             Role role = new Role("Frontend Developer");
             User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
             User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");

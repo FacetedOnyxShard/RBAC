@@ -19,11 +19,11 @@ public class RoleManager implements Repository<Role> {
     @Override
     public void add(Role item) {
         if (item == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Input param must be not null object");
         }
 
         if (rolesByNameIdx.containsKey(item.getName())) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("This name already exists: " + item.getName());
         }
 
         rolesById.put(item.getId(), item);
@@ -36,8 +36,16 @@ public class RoleManager implements Repository<Role> {
             return false;
         }
 
-        return rolesById.remove(item.getId(), item)
-                && rolesByNameIdx.remove(item.getName(), item);
+        if (!rolesById.remove(item.getId(), item)) {
+            return false;
+        }
+
+        if (!rolesByNameIdx.remove(item.getName(), item)) {
+            return false;
+        }
+
+        Set<String> usedNames = item.getUsedNames();
+        return usedNames.remove(item.getName());
     }
 
     @Override

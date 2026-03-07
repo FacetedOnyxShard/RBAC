@@ -43,6 +43,10 @@ public class Role {
         this.permissions = permissions == null ? createDefaultSet() : permissions;
     }
 
+    public Set<String> getUsedNames() {
+        return usedNames;
+    }
+
     public String getId() {
         return id;
     }
