@@ -1,4 +1,6 @@
-package org.example;
+package org.example.command;
+
+import org.example.core.RBACSystem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +10,7 @@ public class CommandParser {
     private final Map<String, Command> commands;
     private final Map<String, String> commandDescriptions;
 
-    CommandParser() {
+    public CommandParser() {
         commands = new HashMap<>();
         commandDescriptions = new HashMap<>();
     }
@@ -35,7 +37,7 @@ public class CommandParser {
         }
     }
 
-    void parseAndExecute(String input, Scanner scanner, RBACSystem system) {
+    public void parseAndExecute(String input, Scanner scanner, RBACSystem system) {
         String[] tokens = input.split("\\s+");
         String commandName = tokens[0];
         commands.get(commandName).execute(scanner, system);

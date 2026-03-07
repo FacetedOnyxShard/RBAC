@@ -1,4 +1,11 @@
-package org.example;
+package org.example.assignment;
+
+import org.example.core.Permission;
+import org.example.core.Repository;
+import org.example.role.Role;
+import org.example.role.RoleManager;
+import org.example.user.User;
+import org.example.user.UserManager;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -141,7 +148,7 @@ public class AssignmentManager implements Repository<RoleAssignment> {
             permanentAssignment.revoke();
         } else if (assignment instanceof  TemporaryAssignment temporaryAssignment) {
             LocalDateTime currentDateTime = LocalDateTime.now();
-            temporaryAssignment.expiresAt = currentDateTime.toString();
+            temporaryAssignment.setExpiresAt(currentDateTime.toString());
         }
     }
 

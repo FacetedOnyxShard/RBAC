@@ -1,4 +1,6 @@
-package org.example;
+package org.example.command;
+
+import org.example.core.RBACSystem;
 
 import java.util.Scanner;
 

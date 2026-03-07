@@ -1,4 +1,4 @@
-package org.example;
+package org.example.core;
 
 
 public record Permission(String name, String resource, String description) {
@@ -20,11 +20,11 @@ public record Permission(String name, String resource, String description) {
         this.description = transformedDescription;
     }
 
-    String format() {
+    public String format() {
         return String.format("%s on %s: %s", name, resource, description);
     }
 
-    boolean matches(String namePattern, String resourcePattern) {
+    public boolean matches(String namePattern, String resourcePattern) {
         boolean nameMatches = namePattern == null || name.contains(namePattern) || name.matches(namePattern);
         boolean resourceMatches = resourcePattern == null || resource.contains(resourcePattern) || resource.matches(resourcePattern);
         return nameMatches && resourceMatches;

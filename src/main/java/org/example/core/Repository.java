@@ -1,4 +1,4 @@
-package org.example;
+package org.example.core;
 
 import java.util.List;
 import java.util.Optional;

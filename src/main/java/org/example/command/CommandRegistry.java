@@ -1,6 +1,16 @@
-package org.example;
+package org.example.command;
 
 import de.vandermeer.asciitable.AsciiTable;
+import org.example.assignment.*;
+import org.example.assignment.PermanentAssignment;
+import org.example.core.Permission;
+import org.example.core.RBACSystem;
+import org.example.role.Role;
+import org.example.assignment.TemporaryAssignment;
+import org.example.user.User;
+import org.example.user.UserFilter;
+import org.example.user.UserFilters;
+import org.example.util.InputUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -435,7 +445,7 @@ public class CommandRegistry {
                         String reason = scanner.nextLine();
 
                         AbstractRoleAssignment newAssignment;
-                        AssignmentMetadata metadata = AssignmentMetadata.now(system.currentUser, reason);
+                        AssignmentMetadata metadata = AssignmentMetadata.now(system.getCurrentUser(), reason);
                         List<Role> roleList = system.roleManager.findAll();
 
                         Optional<User> optionalUser = system.userManager.findByUsername(username);

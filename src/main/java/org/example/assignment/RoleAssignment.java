@@ -1,4 +1,7 @@
-package org.example;
+package org.example.assignment;
+
+import org.example.role.Role;
+import org.example.user.User;
 
 public interface RoleAssignment {
     String assignmentId();

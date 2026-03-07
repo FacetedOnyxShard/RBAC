@@ -1,17 +1,40 @@
 package org.example;
 
+import org.example.command.CommandParser;
+import org.example.command.CommandRegistry;
+import org.example.role.Role;
+import org.example.user.User;
+import org.example.core.Permission;
+import org.example.core.RBACSystem;
+
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        testCommands();
-    }
+        RBACSystem system = new RBACSystem();
+        system.initialize();
 
-    private static void testCommands() {
-        int i = 1;
-        String str = "hello";
-        System.out.println("Список:");
-        System.out.printf("\t%d. %s", i, str);
+        CommandParser parser = new CommandParser();
+        new CommandRegistry(parser);
+
+        Scanner scanner = new Scanner(System.in);
+        boolean initialInfoShowed = false;
+        while (true) {
+            if (!initialInfoShowed) {
+                System.out.println("Информация для новых пользователей\nhelp - список доступных команд,\nexit - выход\n");
+                initialInfoShowed = true;
+            }
+
+            System.out.println("Введите команду:");
+            try {
+                String input = scanner.nextLine();
+                parser.parseAndExecute(input, scanner, system);
+            } catch (Exception e) {
+                System.out.println("Ошибка: " + e.getMessage());
+            }
+
+            System.out.println("\n");
+        }
     }
 
     private static void testScanner() {

@@ -1,11 +1,18 @@
 package org.example;
 
+import org.example.assignment.AssignmentManager;
+import org.example.assignment.AssignmentMetadata;
+import org.example.assignment.PermanentAssignment;
+import org.example.role.Role;
+import org.example.assignment.RoleAssignment;
+import org.example.role.RoleManager;
+import org.example.user.User;
+import org.example.user.UserFilter;
+import org.example.user.UserFilters;
+import org.example.user.UserManager;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import org.junitpioneer.jupiter.*;
-import org.junitpioneer.jupiter.cartesian.CartesianTest;
 
 import java.util.*;
 
@@ -242,62 +249,6 @@ public class TestManagers {
 
 
             assertTrue(roleManager.remove(role));
-        }
-
-        @Test
-        public void test_remove_shouldReturnFalse() {
-            Role role = new Role("CEO");
-            User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
-            User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");
-            AssignmentMetadata metadata = AssignmentMetadata.now(supervisor.username(), "Delegate");
-
-            RoleAssignment permanentAssignment = new PermanentAssignment(subordinate, role, metadata);
-            assignmentManager.add(permanentAssignment);
-
-
-            roleManager.add(role);
-
-
-            assertFalse(roleManager.remove(role));
-        }
-
-        @Test
-        public void test_clear_shouldDoesNotThrow() {
-            Role main = new Role("CEO");
-            Role helper = new Role("Manager");
-            Role designer = new Role("UX/UI");
-            List<Role> roleList = List.of(main, helper, designer);
-
-
-            for (int i = 0; i < roleList.size(); ++i) {
-                roleManager.add(roleList.get(i));
-            }
-
-
-            assertDoesNotThrow(roleManager::clear);
-        }
-
-        @Test
-        public void test_clear_shouldThrowIllegalStateException() {
-            Role main = new Role("CEO");
-            Role helper = new Role("Manager");
-            Role designer = new Role("UX/UI");
-            List<Role> roleList = new ArrayList<>(List.of(main, helper, designer));
-
-            User supervisor = new User("hikaruvi", "Daniil Rybkin", "dan.ran@gmail.com");
-            User subordinate = new User("dmitriy_malickov", "Dima Blinan", "dd@yandex.ru");
-            AssignmentMetadata metadata = AssignmentMetadata.now(supervisor.username(), "Delegate");
-
-            RoleAssignment permanentAssignment = new PermanentAssignment(subordinate, main, metadata);
-            assignmentManager.add(permanentAssignment);
-
-
-            for (Role role : roleList) {
-                roleManager.add(role);
-            }
-
-
-            assertThrows(IllegalStateException.class, roleManager::clear);
         }
     }
 

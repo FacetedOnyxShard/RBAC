@@ -1,4 +1,7 @@
-package org.example;
+package org.example.assignment;
+
+import org.example.role.Role;
+import org.example.user.User;
 
 public class PermanentAssignment extends AbstractRoleAssignment {
     private boolean revoked = false;
@@ -17,7 +20,7 @@ public class PermanentAssignment extends AbstractRoleAssignment {
         return "PERMANENT";
     }
 
-    void revoke() {
+    public void revoke() {
         revoked = true;
     }
 

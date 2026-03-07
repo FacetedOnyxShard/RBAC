@@ -1,16 +1,27 @@
-package org.example;
+package org.example.assignment;
+
+import org.example.role.Role;
+import org.example.user.User;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 public class TemporaryAssignment extends AbstractRoleAssignment {
-    String expiresAt;
+    private String expiresAt;
     boolean autoRenew;
 
     public TemporaryAssignment(User user, Role role, AssignmentMetadata metadata, String expiresAt, boolean autoRenew) {
         super(user, role, metadata);
         this.expiresAt = expiresAt;
         this.autoRenew = autoRenew;
+    }
+
+    public String getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(String expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     @Override

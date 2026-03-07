@@ -1,4 +1,6 @@
-package org.example;
+package org.example.role;
+
+import org.example.core.Permission;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -122,7 +124,7 @@ public class Role {
         return String.format("Role{id='%s', name='%s'}", id, name);
     }
 
-    String format() {
+    public String format() {
         String header = """
                 %s: %s [ID: %s]
                 Description: %s

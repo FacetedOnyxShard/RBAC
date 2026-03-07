@@ -1,4 +1,6 @@
-package org.example;
+package org.example.role;
+
+import org.example.core.Permission;
 
 public abstract class RoleFilters implements RoleFilter {
     public static RoleFilter byName(String name) {

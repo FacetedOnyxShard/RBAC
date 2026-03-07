@@ -1,4 +1,4 @@
-package org.example;
+package org.example.user;
 
 import java.util.regex.Pattern;
 
@@ -34,7 +34,7 @@ public record User(String username, String fullName, String email) {
         return new User(username, fullName, email);
     }
 
-    String format() {
+    public String format() {
         String[] nameParts = fullName.split("\\s+");
         return String.format("%s (%s %s) <%s>", username, nameParts[0], nameParts[1], email);
     }

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.role;
 
 import java.util.Comparator;
 

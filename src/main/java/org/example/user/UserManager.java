@@ -1,4 +1,6 @@
-package org.example;
+package org.example.user;
+
+import org.example.core.Repository;
 
 import java.util.*;
 
@@ -42,7 +44,7 @@ public class UserManager implements Repository<User> {
                 .findFirst();
     }
 
-    List<User> findByFilter(UserFilter filter) {
+    public List<User> findByFilter(UserFilter filter) {
         return users.values().stream()
                 .filter(filter::test)
                 .toList();
@@ -58,7 +60,7 @@ public class UserManager implements Repository<User> {
         return users.containsKey(username.trim());
     }
 
-    void update(String username, String newFullName, String newEmail) {
+    public void update(String username, String newFullName, String newEmail) {
         if (username == null || newFullName == null || newEmail == null) {
             throw new IllegalArgumentException();
         }

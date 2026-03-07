@@ -1,10 +1,18 @@
-package org.example;
+package org.example.core;
+
+import org.example.assignment.AssignmentManager;
+import org.example.assignment.AssignmentMetadata;
+import org.example.assignment.PermanentAssignment;
+import org.example.role.Role;
+import org.example.role.RoleManager;
+import org.example.user.User;
+import org.example.user.UserManager;
 
 public class RBACSystem {
-    UserManager userManager;
-    RoleManager roleManager;
-    AssignmentManager assignmentManager;
-    String currentUser;
+    public UserManager userManager;
+    public RoleManager roleManager;
+    public AssignmentManager assignmentManager;
+    private String currentUser;
 
     public UserManager getUserManager() {
         return userManager;
@@ -37,7 +45,7 @@ public class RBACSystem {
     }
 
 
-    void initialize() {
+    public void initialize() {
         userManager = new UserManager();
         roleManager = new RoleManager();
         assignmentManager = new AssignmentManager();

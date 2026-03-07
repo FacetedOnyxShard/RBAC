@@ -1,5 +1,8 @@
-package org.example;
+package org.example.assignment;
 
+
+import org.example.role.Role;
+import org.example.user.User;
 
 import java.time.LocalDateTime;
 
@@ -47,7 +50,7 @@ public abstract class AssignmentFilters implements AssignmentFilter {
     public static AssignmentFilter expiringBefore(String date) {
         return assignment -> {
             if (assignment instanceof TemporaryAssignment temporaryAssignment) {
-                LocalDateTime expirationDate = LocalDateTime.parse(temporaryAssignment.expiresAt);
+                LocalDateTime expirationDate = LocalDateTime.parse(temporaryAssignment.getExpiresAt());
                 LocalDateTime selectedDate = LocalDateTime.parse(date);
                 return expirationDate.isBefore(selectedDate);
             }

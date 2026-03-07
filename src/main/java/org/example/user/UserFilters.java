@@ -1,4 +1,4 @@
-package org.example;
+package org.example.user;
 
 
 public abstract class UserFilters implements UserFilter {

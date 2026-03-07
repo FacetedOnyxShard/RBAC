@@ -1,4 +1,4 @@
-package org.example;
+package org.example.assignment;
 
 @FunctionalInterface
 public interface AssignmentFilter {

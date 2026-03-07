@@ -1,6 +1,5 @@
-package org.example;
+package org.example.util;
 
-import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class InputUtils {

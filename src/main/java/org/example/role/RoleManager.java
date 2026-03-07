@@ -1,4 +1,8 @@
-package org.example;
+package org.example.role;
+
+import org.example.assignment.AssignmentManager;
+import org.example.core.Permission;
+import org.example.core.Repository;
 
 import java.util.*;
 
