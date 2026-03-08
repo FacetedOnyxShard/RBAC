@@ -69,4 +69,22 @@ public abstract class AbstractRoleAssignment implements RoleAssignment {
                 formattedDate, metadata.reason(), isActive() ? "ACTIVE" : "INACTIVE"
                 );
     }
+
+
+    public String summary(int n) {
+        LocalDateTime dateTime = LocalDateTime.parse(metadata.assignedAt());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String formattedDate = dateTime.format(formatter);
+
+        String summaryBaseTemplate = """
+                [%s] %s assigned to %s by %s at %s
+                \t\tReason: %s
+                \t\tStatus: %s
+                """;
+
+        return String.format(summaryBaseTemplate, assignmentType(), role.getName(),
+                user.username(), metadata.assignedBy(),
+                formattedDate, metadata.reason(), isActive() ? "ACTIVE" : "INACTIVE"
+        );
+    }
 }

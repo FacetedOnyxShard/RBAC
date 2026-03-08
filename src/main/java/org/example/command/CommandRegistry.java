@@ -49,7 +49,7 @@ public class CommandRegistry {
                 return;
             }
 
-            HashSet<String> availableFlags = new HashSet<>(Set.of("username", "email", "name"));
+            HashSet<String> availableFlags = new HashSet<>(Set.of("username", "email", "name", "domain"));
             List<UsernameFieldHelper> fields = new ArrayList<>();
             List<String> values = new ArrayList<>();
 
@@ -584,23 +584,22 @@ public class CommandRegistry {
 
                         String username;
                         System.out.println("Введите username пользователя, которому хотите назначить роль:");
-                        username = inputScanner.nextLine();
+                        username = inputScanner.nextLine(); // TODO
 
                         parser.executeCommand("role-list", inputScanner, system);
                         System.out.println("Введите номер желаемой роли:");
                         int selectedRoleNumber = Integer.parseInt(inputScanner.nextLine());
                         int selectedRoleIdx = selectedRoleNumber - 1;
 
-                        System.out.println("Выберите тип назначения (0 - постоянное, 1 - временное):");
-                        boolean selectedAssignmentType = inputScanner.nextBoolean();
+                        int selectedAssignmentType = InputUtils.readInt(inputScanner, "Выберите тип назначения (0 - постоянное, 1 - временное):"); // TODO: проверка что это 0 или 1
 
                         String expirationDate = null;
-                        if (selectedAssignmentType) {
-                            System.out.println("Введите дату истечения");
+                        if (selectedAssignmentType == 1) {
+                            System.out.println("Введите дату истечения (формат yyyy-MM-dd HH:mm):");
                             expirationDate = inputScanner.nextLine();
                         }
 
-                        System.out.println("Укажите причину назначения");
+                        System.out.println("Укажите причину назначения:");
                         String reason = inputScanner.nextLine();
 
                         AbstractRoleAssignment newAssignment;
@@ -615,12 +614,14 @@ public class CommandRegistry {
                         User user = optionalUser.get();
                         Role selectedRole = roleList.get(selectedRoleIdx);
 
-                        if (selectedAssignmentType) {
+                        if (selectedAssignmentType == 1) {
                             newAssignment = new TemporaryAssignment(user, selectedRole, metadata, expirationDate, false);
                         } else {
                             newAssignment = new PermanentAssignment(user, selectedRole, metadata);
                         }
                         system.assignmentManager.add(newAssignment);
+
+                        System.out.printf("Роль %s успешно назначена пользователю %s.\n", selectedRole.getName(), username);
                     });
 
             parser.registerCommand("revoke-role",
@@ -628,18 +629,21 @@ public class CommandRegistry {
                     (scanner, system) -> {
                         Scanner inputScanner = new Scanner(System.in);
 
-                        parser.executeCommand("user-list", new Scanner(""), system);
+                        parser.executeCommand("assignment-list", new Scanner(""), system);
 
                         String username = InputUtils.readLine(inputScanner,
                                 "Введите username пользователя у которого хотите отзвать роль:");
 
-                        parser.executeCommand("assignment-list-user", inputScanner, system);
+                        parser.executeCommand("assignment-list-user", inputScanner, system); // TODO
+
                         int selectedAssignmentNumber = InputUtils.readInt(inputScanner,
                                 "Введите номер назначения, которое хотите отозвать:");
                         int selectedAssignmentIdx = selectedAssignmentNumber - 1;
 
                         List<RoleAssignment> roleAssignmentList = system.assignmentManager.findAll();
                         system.assignmentManager.remove(roleAssignmentList.get(selectedAssignmentIdx));
+
+                        System.out.println("Роль успешно отозвана.");
                     });
 
             parser.registerCommand("assignment-list",
@@ -723,6 +727,13 @@ public class CommandRegistry {
                         String now = LocalDateTime.now().toString();
                         List<RoleAssignment> roleAssignmentList =
                                 system.assignmentManager.findByFilter(AssignmentFilters.expiringBefore(now));
+
+                        if (roleAssignmentList.isEmpty()) {
+                            System.out.println("Нет ни одного истекшего временного назначения");
+                            return;
+                        }
+
+                        System.out.println("Список истекших временных назначений");
                         int n = 1;
                         for (RoleAssignment roleAssignment : roleAssignmentList) {
                             System.out.printf("\t%d. %s\n", n, roleAssignment.user().format());
@@ -747,19 +758,21 @@ public class CommandRegistry {
             parser.registerCommand("assignment-search", "поиск назначений по фильтрам", (scanner, system) -> {
                 Scanner inputScanner = new Scanner(System.in);
 
+                System.out.println("Меню фильтров:");
                 System.out.println("""
                         1. По пользователю
-                        "2. По роли
-                        "3. По типу
-                        "4. Активные
-                        "5. Неактивные
-                        "6. После даты
-                        "7. До даты
+                        2. По роли
+                        3. По типу
+                        4. Активные
+                        5. Неактивные
+                        6. После даты
+                        7. До даты
                         """);
 
-                AssignmentFilter filter = switch (InputUtils.readInt(inputScanner, "Выберите:")) {
+                AssignmentFilter filter = switch (InputUtils.readInt(inputScanner, "Выберите номер фильтра:")) {
                     case 1 -> {
-                        String username = InputUtils.readLine(inputScanner, "Имя:");
+                        parser.executeCommand("user-list", inputScanner, system);
+                        String username = InputUtils.readLine(inputScanner, "Имя пользователя:");
                         Optional<User> optionalUser = system.userManager.findByUsername(username);
                         if (optionalUser.isEmpty()) {
                             yield null;
@@ -786,7 +799,17 @@ public class CommandRegistry {
                 if (filter != null) {
                     results = system.assignmentManager.findByFilter(filter);
                 }
-                System.out.println(results.isEmpty() ? "Ничего не найдено" : results);
+                if (results.isEmpty()) {
+                    System.out.println("По данным фильтрам ничего не найдено");
+                    return;
+                }
+
+                System.out.println("Найденные назначения:");
+                int n = 1;
+                for (RoleAssignment roleAssignment : results) {
+                    System.out.printf("\t%d. %s\n", n, roleAssignment.summary(1));
+                    ++n;
+                }
             });
         }
     }
@@ -884,7 +907,7 @@ public class CommandRegistry {
             parser.registerCommand("stats",
                     "статистика системы",
                     (scanner, system) -> {
-                        System.out.println(system.generateStatistics());
+                        System.out.printf(system.generateStatistics());
                     });
 
             parser.registerCommand("clear",

@@ -10,4 +10,6 @@ public interface RoleAssignment {
     AssignmentMetadata metadata();
     boolean isActive();
     String assignmentType();
+
+    String summary(int n);
 }
