@@ -5,6 +5,7 @@ import org.example.core.RBACSystem;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -13,23 +14,23 @@ public class CommandParser {
     private final Map<String, String> commandDescriptions;
 
     public CommandParser() {
-        commands = new HashMap<>();
-        commandDescriptions = new HashMap<>();
+        commands = new LinkedHashMap<>();
+        commandDescriptions = new LinkedHashMap<>();
     }
 
-    void registerCommand(String name, String description, Command command) {
+    public void registerCommand(String name, String description, Command command) {
         commands.put(name, command);
         commandDescriptions.put(name, description);
     }
 
-    void executeCommand(String commandName, Scanner scanner, RBACSystem system) {
+    public void executeCommand(String commandName, Scanner scanner, RBACSystem system) {
         if (!commands.containsKey(commandName)) {
             throw new IllegalArgumentException();
         }
         commands.get(commandName).execute(scanner, system);
     }
 
-    void printHelp() {
+    public void printHelp() {
         System.out.println("Command list:");
         int Id = 1;
         for (Map.Entry<String, Command> command : commands.entrySet()) {
@@ -46,6 +47,12 @@ public class CommandParser {
         String arguments = tokens.length > 1 ? tokens[1] : "";
 
         Scanner commandArgs = new Scanner(arguments);
-        commands.get(commandName).execute(commandArgs, system);
+
+        try {
+            Command command = commands.get(commandName);
+            command.execute(commandArgs, system);
+        } catch (Exception e) {
+            throw new RuntimeException("такой команды не существует");
+        }
     }
 }

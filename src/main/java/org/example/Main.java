@@ -1,15 +1,12 @@
 package org.example;
 
-import org.antlr.v4.parse.v4ParserException;
 import org.example.command.CommandParser;
-import org.example.command.CommandRegistry;
+import org.example.command.registry.CommandRegistry;
 import org.example.role.Role;
 import org.example.user.User;
 import org.example.core.Permission;
 import org.example.core.RBACSystem;
 
-import java.lang.reflect.Field;
-import java.text.ParseException;
 import java.util.*;
 
 public class Main {
@@ -28,22 +25,13 @@ public class Main {
 
     private static void programInterface() {
 //        Обязательные изменения
-//        починить clear
-//
-//        Сделать нормальные временные назначения
-//        Правильно форматировать дату.
-//
-//        Дописать stats
-//        (более подробно assignments,
-//        среднее кол-во ролей на пользователя,
-//        топ3 популярных ролей)
+//        Сделать табличный вывод в user-list
 
 //        Необязательные изменения
 //          1. убрать ввод названия роли при добавлении прав только что созданной роли.
 //          2. сделать чтобы роль admin нельзя было удалять и нельзя было удалить пользователя с этой ролью,
 //          если он 1.
 //          3. сделать нормальную обработку ошибки неверной команды
-
 
 
         RBACSystem system = new RBACSystem();

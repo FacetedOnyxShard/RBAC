@@ -7,7 +7,11 @@ import java.util.List;
 
 public class AuditLog {
 
-    private List<AuditEntry> entries;
+    private final List<AuditEntry> entries;
+
+    public AuditLog() {
+        entries = new ArrayList<>();
+    }
 
     public record AuditEntry(
             String timestamp,

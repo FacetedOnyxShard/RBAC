@@ -5,7 +5,7 @@ import org.example.core.RBACSystem;
 import java.util.Scanner;
 
 @FunctionalInterface
-interface Command {
+public interface Command {
     void execute(Scanner scanner, RBACSystem system);
 }
 

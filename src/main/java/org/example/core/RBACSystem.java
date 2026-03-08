@@ -44,9 +44,9 @@ public class RBACSystem {
         return String.format(
                         """
                         REPORT:
-                            count users       : %d
-                            count roles       : %d
-                            count assignments : %d
+                        \tcount users       : %d
+                        \tcount roles       : %d
+                        \tcount assignments : %d
                         """, userManager.count(), roleManager.count(), assignmentManager.count());
     }
 
@@ -61,7 +61,10 @@ public class RBACSystem {
         assignmentManager.setRoleManager(roleManager);
         assignmentManager.setUserManager(userManager);
 
+        createInitialRBACStructure();
+    }
 
+    private void createInitialRBACStructure() {
         Role admin = new Role("Admin", "manages everything");
         Permission adminCreateUsers = new Permission("CREATE", "users", "admin crud");
         Permission adminReadUsersData = new Permission("READ", "users data", "admin crud");
