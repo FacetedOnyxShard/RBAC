@@ -1,8 +1,7 @@
-package org.example;
+package org.example.util;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class ValidationUtils {

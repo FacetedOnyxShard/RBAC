@@ -38,6 +38,101 @@ public class CommandRegistry {
             return !scanner.hasNext();
         }
 
+        private void userListLogic(Scanner scanner, RBACSystem system) {
+            if (commandWithoutFlags(scanner)) {
+                System.out.println("Список всех пользователей:");
+                int n = 1;
+                for (User user : system.userManager.findAll()) {
+                    System.out.printf("\t%d. %s\n", n, user.format());
+                    ++n;
+                }
+                return;
+            }
+
+            HashSet<String> availableFlags = new HashSet<>(Set.of("username", "email", "name"));
+            List<UsernameFieldHelper> fields = new ArrayList<>();
+            List<String> values = new ArrayList<>();
+
+            while (scanner.hasNext()) {
+                String currentParam = scanner.next();
+                if (currentParam.length() > 2 && currentParam.startsWith("--")) {
+                    String flagValue = currentParam.substring(2);
+
+                    if (!availableFlags.contains(flagValue)) {
+                        throw new RuntimeException();
+                    }
+                    if (!scanner.hasNext()) {
+                        throw new RuntimeException();
+                    }
+
+                    String value = scanner.next();
+
+                    if (value.isBlank()) {
+                        throw new RuntimeException();
+                    }
+
+                    fields.add(UsernameFieldHelper.fromFlag(flagValue));
+                    values.add(value);
+                }
+            }
+
+            searchLogicForManyFilters(fields, values, system);
+        }
+
+        private void userCreateLogic(Scanner scanner, RBACSystem system) {
+            Scanner inputScanner = new Scanner(System.in);
+
+            User newUser;
+            while (true) {
+                String username = InputUtils.readLine(inputScanner, UsernameFieldHelper.USERNAME.getMessage());
+                String fullName = InputUtils.readLine(inputScanner, UsernameFieldHelper.FULL_NAME.getMessage());
+                String email = InputUtils.readLine(inputScanner, UsernameFieldHelper.EMAIL.getMessage());
+
+                try {
+                    newUser = new User(username, fullName, email);
+                    break;
+                } catch (Exception e) {
+                    System.out.println("Не получилось создать пользователя. Ошибка: " + e.getMessage());
+                }
+            }
+
+            system.userManager.add(newUser);
+            System.out.println("Пользователь создан успешно.");
+        }
+
+        private void userViewLogic(Scanner scanner, RBACSystem system)   {
+            Scanner inputScanner = new Scanner(System.in);
+            String username = InputUtils.readLine(inputScanner, UsernameFieldHelper.USERNAME.getMessage());
+
+            Optional<User> userOptional = system.userManager.findByUsername(username);
+
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+
+                List<RoleAssignment> roleAssignmentList = findUserAssignments(system, user);
+
+                System.out.println("Информация о пользователе");
+                System.out.println("\tОбщая информация: " + user.format());
+
+                System.out.println("\tСписок назначенных ролей: ");
+                IntStream.range(0, roleAssignmentList.size())
+                        .forEach(i -> System.out.println("\t\t" + (i + 1) + ". " + roleAssignmentList.get(i)));
+
+                System.out.println("\tПрава пользователя: ");
+                Permission[] currentRolePermissions;
+                for (int i = 0; i < roleAssignmentList.size(); ++i) {
+                    currentRolePermissions =
+                            roleAssignmentList.get(i).role().getPermissions().toArray(new Permission[0]);
+
+                    for (int j = 0; j < currentRolePermissions.length; ++j) {
+                        System.out.println("\t\t" + (i + j + 1) + ". " + currentRolePermissions[j]);
+                    }
+                }
+            } else {
+                System.out.println("Пользователь с username = " + username + " не найден");
+            }
+        }
+
         public UserCommands(CommandParser parser) {
             parser.registerCommand("user-list",
                     """
@@ -48,104 +143,15 @@ public class CommandRegistry {
                     \t\t\t--domain <email domain>
                     \t\t\t--name <full name>
                     """,
-                    (scanner, system) -> {
-                        if (commandWithoutFlags(scanner)) {
-                            System.out.println("Список всех пользователей:");
-                            int n = 1;
-                            for (User user : system.userManager.findAll()) {
-                                System.out.printf("\t%d. %s\n", n, user.format());
-                                ++n;
-                            }
-                            return;
-                        }
-
-                        HashSet<String> availableFlags = new HashSet<>(Set.of("username", "email", "name"));
-                        List<UsernameFieldHelper> fields = new ArrayList<>();
-                        List<String> values = new ArrayList<>();
-
-                        while (scanner.hasNext()) {
-                            String currentParam = scanner.next();
-                            if (currentParam.length() > 2 && currentParam.startsWith("--")) {
-                                String flagValue = currentParam.substring(2);
-
-                                if (!availableFlags.contains(flagValue)) {
-                                    throw new RuntimeException();
-                                }
-                                if (!scanner.hasNext()) {
-                                    throw new RuntimeException();
-                                }
-
-                                String value = scanner.next();
-
-                                if (value.isBlank()) {
-                                    throw new RuntimeException();
-                                }
-
-                                fields.add(UsernameFieldHelper.fromFlag(flagValue));
-                                values.add(value);
-                            }
-                        }
-
-                        searchLogicForManyFilters(fields, values, system);
-                    });
+                    this::userListLogic);
 
             parser.registerCommand("user-create",
                     "создать нового пользователя",
-                    (scanner, system) -> {
-                        Scanner inputScanner = new Scanner(System.in);
-
-                        User newUser;
-                        while (true) {
-                            String username = InputUtils.readLine(inputScanner, UsernameFieldHelper.USERNAME.getMessage());
-                            String fullName = InputUtils.readLine(inputScanner, UsernameFieldHelper.FULL_NAME.getMessage());
-                            String email = InputUtils.readLine(inputScanner, UsernameFieldHelper.EMAIL.getMessage());
-
-                            try {
-                                newUser = new User(username, fullName, email);
-                                break;
-                            } catch (Exception e) {
-                                System.out.println("Не получилось создать пользователя. Ошибка: " + e.getMessage());
-                            }
-                        }
-
-                        system.userManager.add(newUser);
-                        System.out.println("Пользователь создан успешно.");
-                    });
+                    this::userCreateLogic);
 
             parser.registerCommand("user-view",
                     "просмотр информации о пользователе",
-                    ((scanner, system) -> {
-                        Scanner inputScanner = new Scanner(System.in);
-                        String username = InputUtils.readLine(inputScanner, UsernameFieldHelper.USERNAME.getMessage());
-
-                        Optional<User> userOptional = system.userManager.findByUsername(username);
-
-                        if (userOptional.isPresent()) {
-                            User user = userOptional.get();
-
-                            List<RoleAssignment> roleAssignmentList = findUserAssignments(system, user);
-
-                            System.out.println("Информация о пользователе");
-                            System.out.println("\tОбщая информация: " + user.format());
-
-                            System.out.println("\tСписок назначенных ролей: ");
-                            IntStream.range(0, roleAssignmentList.size())
-                                    .forEach(i -> System.out.println("\t\t" + (i + 1) + ". " + roleAssignmentList.get(i)));
-
-                            System.out.println("\tПрава пользователя: ");
-                            Permission[] currentRolePermissions;
-                            for (int i = 0; i < roleAssignmentList.size(); ++i) {
-                                currentRolePermissions =
-                                        roleAssignmentList.get(i).role().getPermissions().toArray(new Permission[0]);
-
-                                for (int j = 0; j < currentRolePermissions.length; ++j) {
-                                    System.out.println("\t\t" + (i + j + 1) + ". " + currentRolePermissions[j]);
-                                }
-                            }
-                        } else {
-                            System.out.println("Пользователь с username = " + username + " не найден");
-                        }
-                    }));
+                    this::userViewLogic);
 
             parser.registerCommand("user-update",
                     "обновить данные пользователя",
