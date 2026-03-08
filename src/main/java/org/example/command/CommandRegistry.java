@@ -15,6 +15,7 @@ import org.example.user.UserFilters;
 import org.example.util.AuditLog;
 import org.example.util.InputUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -914,8 +915,9 @@ public class CommandRegistry {
             parser.registerCommand("clear",
                     "очистить экран",
                     (scanner, system) -> {
-                        System.out.print("\033[H\033[3J");
-                        System.out.flush();
+                        for (int i = 0; i < 50; ++i) {
+                            System.out.println();
+                        }
                     });
 
             parser.registerCommand("exit",
