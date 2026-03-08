@@ -1,6 +1,8 @@
 package org.example.user;
 
 import org.example.core.Repository;
+import org.example.util.ConsoleUtils;
+import org.example.util.ValidationUtils;
 
 import java.util.*;
 
@@ -57,7 +59,7 @@ public class UserManager implements Repository<User> {
     }
 
     boolean exists(String username) {
-        return users.containsKey(username.trim());
+        return users.containsKey(ValidationUtils.normalizeString(username));
     }
 
     public void update(String username, String newFullName, String newEmail) {
@@ -65,13 +67,19 @@ public class UserManager implements Repository<User> {
             throw new IllegalArgumentException();
         }
 
-        String usernameNormalized = username.trim();
+        final String usernameNormalized = ValidationUtils.normalizeString(username);
 
         if (!users.containsKey(usernameNormalized)) {
             throw new IllegalArgumentException("User not exists");
         }
 
-        User userUpdated = new User(usernameNormalized, newFullName, newEmail);
+        User userUpdated;
+        try {
+            userUpdated = User.validate(usernameNormalized, newFullName, newEmail);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
         users.replace(usernameNormalized, userUpdated);
     }
 

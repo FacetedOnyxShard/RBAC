@@ -28,13 +28,13 @@ public class ValidationUtils {
     }
 
     public static boolean isValidDate(String date) {
-//      формат даты из RBAC_1 AbstractRoleAssignment summary 2026-02-07 19:00
-        if (date == null || date.length() != "2026-02-07 19:00".length()) {
+//      формат даты из RBAC_4 2026-02-07 19:00:00
+        if (date == null || date.length() != "2026-02-07 19:00:00".length()) {
             return false;
         }
 
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             LocalDateTime.parse(date, formatter);
         } catch (Exception e) {
             return false;
