@@ -1,23 +1,69 @@
 package org.example;
 
+import org.antlr.v4.parse.v4ParserException;
+import org.example.command.CommandParser;
+import org.example.command.CommandRegistry;
+import org.example.role.Role;
+import org.example.user.User;
+import org.example.core.Permission;
+import org.example.core.RBACSystem;
+
+import java.lang.reflect.Field;
+import java.text.ParseException;
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        testCommands();
+        programInterface();
     }
 
-    private static void testCommands() {
-        int i = 1;
-        String str = "hello";
-        System.out.println("Список:");
-        System.out.printf("\t%d. %s", i, str);
+    private static void test() {
+        Scanner scanner1 = new Scanner("user-list --username hikaruvi --email yes@gmail.com");
+        String command = "user-list\n";
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.next();
+        scanner.skip("\n\r");
+        System.out.println(scanner.hasNext());
     }
 
-    private static void testScanner() {
-        Scanner scanner = new Scanner("print Hello, Wolrd!");
-        while (scanner.hasNext()) {
-            System.out.println(scanner.next());
+    private static void programInterface() {
+//        user-search | by domain
+//        почему-то не работает поиск по домену.
+//        Вывод: Ошибка: null
+//        При этом user-search нормально ищет по домену
+
+//        остановился на role-search. нужно добавить поиск по:
+//        Название роли (содержит)
+//        По наличию конкретного права
+//        По минимальному количеству прав
+
+//        assign-role
+//        Вывод: Ошибка: null
+
+        RBACSystem system = new RBACSystem();
+        system.initialize();
+
+        CommandParser parser = new CommandParser();
+        new CommandRegistry(parser);
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("""
+                        ==================================
+                        Информация для новых пользователей
+                        ==================================
+                        help - список доступных команд,
+                        exit - выход
+                        """);
+        while (true) {
+            System.out.println("Введите команду:");
+            try {
+                String input = scanner.nextLine();
+                parser.parseAndExecute(input, scanner, system);
+            } catch (Exception e) {
+                System.out.println("Ошибка: " + e.getMessage());
+            }
+
+            System.out.println("\n");
         }
     }
 
