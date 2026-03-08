@@ -7,6 +7,8 @@ import org.example.core.Permission;
 import org.example.core.RBACSystem;
 import org.example.role.Role;
 import org.example.assignment.TemporaryAssignment;
+import org.example.role.RoleFilter;
+import org.example.role.RoleFilters;
 import org.example.user.User;
 import org.example.user.UserFilter;
 import org.example.user.UserFilters;
@@ -496,16 +498,55 @@ public class CommandRegistry {
                     (scanner, system) -> {
                         Scanner inputScanner = new Scanner(System.in);
 
-                        String name = getName(inputScanner);
-
-                        Optional<Role> optionalRole = system.roleManager.findByName(name);
-                        if (optionalRole.isEmpty()) {
-                            System.out.println("Роль с именем " + name + " не была найдена");
-                            return;
+                        String[] options = {"by name (contains)", "by permission", "by min count permission"};
+                        int i = 1;
+                        for (String option : options) {
+                            System.out.println("\t" + i + ". " + option);
+                            ++i;
                         }
 
-                        Role role = optionalRole.get();
-                        System.out.println(role.toString());
+                        int selectedFilterNumber = InputUtils.readInt(inputScanner, "Введите номер:");
+
+                        if (selectedFilterNumber < 1 || selectedFilterNumber > options.length) {
+                            throw new RuntimeException();
+                        }
+
+                        RoleFilter filter = null;
+                        List<Role> roleList = null;
+                        switch (selectedFilterNumber) {
+                            case 1:
+                                String name = InputUtils.readLine(inputScanner, "Введите имя роли или его часть:");
+                                filter = RoleFilters.byNameContains(name);
+                                break;
+                            case 2:
+                                String permissionName = InputUtils.readLine(inputScanner, "Введите название права:");
+                                String resource = InputUtils.readLine(inputScanner, "Введите ресурс:");
+                                roleList = system.roleManager.findRolesWithPermission(permissionName, resource);
+                                break;
+                            case 3:
+                                int n = InputUtils.readInt(inputScanner, "Введите минимальное количество прав для роли:");
+                                filter = RoleFilters.hasAtLeastNPermissions(n);
+                                break;
+                        }
+
+                        if (roleList == null && filter != null) {
+                            roleList = system.roleManager.findByFilter(filter);
+                        }
+
+                        if (roleList == null) {
+                            throw new RuntimeException();
+                        }
+
+                        if (roleList.isEmpty()) {
+                            System.out.println("Пользователей по данным фильтрам не было найдено");
+                            return;
+                        }
+                        System.out.println("Найденные роли:");
+                        int n = 1;
+                        for (Role role : roleList) {
+                            System.out.printf("\t%d. %s\n", n, role.format(1));
+                            ++n;
+                        }
                     });
         }
 
@@ -533,8 +574,10 @@ public class CommandRegistry {
                     (scanner, system) -> {
                         Scanner inputScanner = new Scanner(System.in);
 
+                        parser.executeCommand("user-list", new Scanner(""), system);
+
                         String username;
-                        System.out.println("Введите username:");
+                        System.out.println("Введите username пользователя, которому хотите назначить роль:");
                         username = inputScanner.nextLine();
 
                         parser.executeCommand("role-list", inputScanner, system);
@@ -579,8 +622,10 @@ public class CommandRegistry {
                     (scanner, system) -> {
                         Scanner inputScanner = new Scanner(System.in);
 
+                        parser.executeCommand("user-list", new Scanner(""), system);
+
                         String username = InputUtils.readLine(inputScanner,
-                                "Введите username:");
+                                "Введите username пользователя у которого хотите отзвать роль:");
 
                         parser.executeCommand("assignment-list-user", inputScanner, system);
                         int selectedAssignmentNumber = InputUtils.readInt(inputScanner,

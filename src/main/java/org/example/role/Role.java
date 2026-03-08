@@ -137,4 +137,18 @@ public class Role {
 
         return String.format(header + permissionsList, this.getClass().getSimpleName(), name, id, description);
     }
+
+    public String format(int n) {
+        String header = """
+                %s: %s [ID: %s]
+                \t\tDescription: %s
+                """;
+
+        String permissionsList = permissions.stream()
+                .map(p -> "\t\t - " + p.format())
+                .collect(Collectors.joining("\n"));
+
+
+        return String.format(header + permissionsList, this.getClass().getSimpleName(), name, id, description);
+    }
 }

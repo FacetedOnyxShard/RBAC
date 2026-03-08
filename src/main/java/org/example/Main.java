@@ -27,6 +27,7 @@ public class Main {
     }
 
     private static void programInterface() {
+//        user-search | by domain
 //        почему-то не работает поиск по домену.
 //        Вывод: Ошибка: null
 //        При этом user-search нормально ищет по домену
@@ -35,6 +36,9 @@ public class Main {
 //        Название роли (содержит)
 //        По наличию конкретного права
 //        По минимальному количеству прав
+
+//        assign-role
+//        Вывод: Ошибка: null
 
         RBACSystem system = new RBACSystem();
         system.initialize();
