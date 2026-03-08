@@ -17,7 +17,7 @@ public class PermanentAssignment extends AbstractRoleAssignment {
 
     @Override
     public String assignmentType() {
-        return "PERMANENT";
+        return Type.PERMANENT.toString();
     }
 
     public void revoke() {

@@ -10,9 +10,9 @@ import org.example.user.UserManager;
 import org.example.util.AuditLog;
 
 public class RBACSystem {
-    public UserManager userManager;
-    public RoleManager roleManager;
-    public AssignmentManager assignmentManager;
+    private UserManager userManager;
+    private RoleManager roleManager;
+    private AssignmentManager assignmentManager;
     private AuditLog auditLog;
     private String currentUser;
 
@@ -55,6 +55,7 @@ public class RBACSystem {
         userManager = new UserManager();
         roleManager = new RoleManager();
         assignmentManager = new AssignmentManager();
+        auditLog = new AuditLog();
 
         roleManager.setAssignmentManager(assignmentManager);
         assignmentManager.setRoleManager(roleManager);

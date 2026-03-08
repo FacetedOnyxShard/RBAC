@@ -32,7 +32,7 @@ public class CommandRegistry {
 
     private static List<RoleAssignment> findUserAssignments(RBACSystem system, User user) {
         AssignmentFilter filterAssignmentByUser = AssignmentFilters.byUser(user);
-        return system.assignmentManager.findByFilter(filterAssignmentByUser);
+        return system.getAssignmentManager().findByFilter(filterAssignmentByUser);
     }
 
     private static class UserCommands {
@@ -44,7 +44,7 @@ public class CommandRegistry {
             if (commandWithoutFlags(scanner)) {
                 System.out.println("Список всех пользователей:");
                 int n = 1;
-                for (User user : system.userManager.findAll()) {
+                for (User user : system.getUserManager().findAll()) {
                     System.out.printf("\t%d. %s\n", n, user.format());
                     ++n;
                 }
@@ -98,15 +98,17 @@ public class CommandRegistry {
                 }
             }
 
-            system.userManager.add(newUser);
+            system.getUserManager().add(newUser);
             System.out.println("Пользователь создан успешно.");
+
+            system.getAuditLog().log("USER_CREATE", system.getCurrentUser(), newUser.username(), "SUCCESS");
         }
 
         private void userViewLogic(Scanner scanner, RBACSystem system)   {
             Scanner inputScanner = new Scanner(System.in);
             String username = InputUtils.readLine(inputScanner, UsernameFieldHelper.USERNAME.getMessage());
 
-            Optional<User> userOptional = system.userManager.findByUsername(username);
+            Optional<User> userOptional = system.getUserManager().findByUsername(username);
 
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
@@ -165,7 +167,7 @@ public class CommandRegistry {
                                 System.out.println("Новые данные пользователя");
                                 String fullName = InputUtils.readLine(inputScanner, UsernameFieldHelper.FULL_NAME.getMessage());
                                 String email = InputUtils.readLine(inputScanner, UsernameFieldHelper.EMAIL.getMessage());
-                                system.userManager.update(username, fullName, email);
+                                system.getUserManager().update(username, fullName, email);
                                 break;
                             } catch (Exception e) {
                                 System.out.println("Не удалось обновить пользователя. Ошибка " + e.getMessage());
@@ -181,7 +183,7 @@ public class CommandRegistry {
                         String username = InputUtils.readLine(inputScanner, UsernameFieldHelper.USERNAME.getMessage());
 
                         if (prompt(inputScanner)) {
-                            Optional<User> optionalUser = system.userManager.findByUsername(username);
+                            Optional<User> optionalUser = system.getUserManager().findByUsername(username);
 
                             if (optionalUser.isEmpty()) {
                                 System.out.println("Пользователь не был найден");
@@ -192,11 +194,12 @@ public class CommandRegistry {
                             List<RoleAssignment> roleAssignmentList = findUserAssignments(system, user);
 
                             for (RoleAssignment roleAssignment : roleAssignmentList) {
-                                system.assignmentManager.remove(roleAssignment);
+                                system.getAssignmentManager().remove(roleAssignment);
                             }
-                            system.userManager.remove(user);
+                            system.getUserManager().remove(user);
 
                             System.out.println("Пользователь успешно удален");
+                            system.getAuditLog().log("USER_DELETE", system.getCurrentUser(), username, "SUCCESS");
                         } else {
                             System.out.println("Действие было отменено пользователем");
                         }
@@ -225,7 +228,7 @@ public class CommandRegistry {
             String filterValue = get(usernameFieldHelper, scanner);
             UserFilter filter = usernameFieldHelper.createFilter(filterValue);
 
-            List<User> userList = system.userManager.findByFilter(filter);
+            List<User> userList = system.getUserManager().findByFilter(filter);
 
             if (userList.isEmpty()) {
                 System.out.println("Пользователей по данным фильтрам не было найдено");
@@ -240,7 +243,7 @@ public class CommandRegistry {
         }
 
         private static void searchLogicForManyFilters(List<UsernameFieldHelper> usernameFieldHelpers, List<String> filterValues, RBACSystem system) {
-            List<User> userList = system.userManager.findAll();
+            List<User> userList = system.getUserManager().findAll();
 
             for (int i = 0; i < usernameFieldHelpers.size(); ++i) {
                 UsernameFieldHelper usernameFieldHelper = usernameFieldHelpers.get(i);
@@ -324,7 +327,7 @@ public class CommandRegistry {
                     (scanner, system) -> {
                         System.out.println("Список ролей:");
                         int n = 1;
-                        for (Role role : system.roleManager.findAll()) {
+                        for (Role role : system.getRoleManager().findAll()) {
                             System.out.printf("\t%d. Название: %s Количество прав: %d ID: %s\n", n, role.toString(), role.getPermissions().size(), role.getId());
                             ++n;
                         }
@@ -337,12 +340,12 @@ public class CommandRegistry {
 
                         Role newRole;
                         while (true) {
-                            try {
-                                String name = getName(inputScanner);
-                                String description = getDescription(inputScanner);
+                            String name = getName(inputScanner);
+                            String description = getDescription(inputScanner);
 
+                            try {
                                 newRole = new Role(name, description);
-                                system.roleManager.add(newRole);
+                                system.getRoleManager().add(newRole);
 
                                 while (InputUtils.confirm(inputScanner, "Хотите добавить новое право")) {
                                     parser.executeCommand("role-add-permission", inputScanner, system);
@@ -353,6 +356,7 @@ public class CommandRegistry {
                             }
                         }
                         System.out.println("Новая роль успешно создана");
+                        system.getAuditLog().log("ROLE_CREATE", system.getCurrentUser(), newRole.getName(), "SUCCESS");
                     });
 
             parser.registerCommand("role-view",
@@ -362,7 +366,7 @@ public class CommandRegistry {
 
                         String name = getName(inputScanner);
 
-                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                         if (optionalRole.isEmpty()) {
                             System.out.println("Роль с именем " + name + " не была найдена");
                             return;
@@ -380,7 +384,7 @@ public class CommandRegistry {
                         String name = getName(inputScanner);
                         String description = getDescription(inputScanner);
 
-                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                         if (optionalRole.isEmpty()) {
                             System.out.println("Роль с именем " + name + " не была найдена");
                             return;
@@ -400,7 +404,7 @@ public class CommandRegistry {
 
                         String name = getName(inputScanner);
 
-                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                         if (optionalRole.isEmpty()) {
                             System.out.println("Роль с именем " + name + " не была найдена");
                             return;
@@ -408,7 +412,7 @@ public class CommandRegistry {
 
                         Role role = optionalRole.get();
 
-                        List<RoleAssignment> roleAssignmentList = system.assignmentManager.findByRole(role);
+                        List<RoleAssignment> roleAssignmentList = system.getAssignmentManager().findByRole(role);
 
                         if (!roleAssignmentList.isEmpty()) {
                             System.out.println("Не удалось удалить роль. Причина: роль назначена пользователям");
@@ -422,8 +426,9 @@ public class CommandRegistry {
                         }
 
                         if (prompt(inputScanner)) {
-                            system.roleManager.remove(role);
+                            system.getRoleManager().remove(role);
                             System.out.println("Роль успешно удалена");
+                            system.getAuditLog().log("ROLE_DELETE", system.getCurrentUser(), name, "SUCCESS");
                         } else {
                             System.out.println("Отмена удаления роли...");
                         }
@@ -436,7 +441,7 @@ public class CommandRegistry {
 
                         String name = getName(inputScanner);
 
-                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                         if (optionalRole.isEmpty()) {
                             System.out.println("Роль с именем " + name + " не была найдена");
                             return;
@@ -463,7 +468,7 @@ public class CommandRegistry {
                         }
 
 
-                        system.roleManager.addPermissionToRole(role.getName(), permission);
+                        system.getRoleManager().addPermissionToRole(role.getName(), permission);
 
                         System.out.println("Новое право успешно добавлено");
                     });
@@ -475,7 +480,7 @@ public class CommandRegistry {
 
                         String name = getName(inputScanner);
 
-                        Optional<Role> optionalRole = system.roleManager.findByName(name);
+                        Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                         if (optionalRole.isEmpty()) {
                             System.out.println("Роль с именем " + name + " не была найдена");
                             return;
@@ -529,7 +534,7 @@ public class CommandRegistry {
                             case 2:
                                 String permissionName = InputUtils.readLine(inputScanner, "Введите название права:");
                                 String resource = InputUtils.readLine(inputScanner, "Введите ресурс:");
-                                roleList = system.roleManager.findRolesWithPermission(permissionName, resource);
+                                roleList = system.getRoleManager().findRolesWithPermission(permissionName, resource);
                                 break;
                             case 3:
                                 int n = InputUtils.readInt(inputScanner, "Введите минимальное количество прав для роли:");
@@ -538,7 +543,7 @@ public class CommandRegistry {
                         }
 
                         if (roleList == null && filter != null) {
-                            roleList = system.roleManager.findByFilter(filter);
+                            roleList = system.getRoleManager().findByFilter(filter);
                         }
 
                         if (roleList == null) {
@@ -606,9 +611,9 @@ public class CommandRegistry {
 
                         AbstractRoleAssignment newAssignment;
                         AssignmentMetadata metadata = AssignmentMetadata.now(system.getCurrentUser(), reason);
-                        List<Role> roleList = system.roleManager.findAll();
+                        List<Role> roleList = system.getRoleManager().findAll();
 
-                        Optional<User> optionalUser = system.userManager.findByUsername(username);
+                        Optional<User> optionalUser = system.getUserManager().findByUsername(username);
                         if (optionalUser.isEmpty()) {
                             System.out.println("Ошибка: не удалось найти пользователя с username = " + username);
                             return;
@@ -617,13 +622,19 @@ public class CommandRegistry {
                         Role selectedRole = roleList.get(selectedRoleIdx);
 
                         if (selectedAssignmentType == 1) {
-                            newAssignment = new TemporaryAssignment(user, selectedRole, metadata, expirationDate, false);
+                            newAssignment = new TemporaryAssignment(user, selectedRole, metadata,
+                                    expirationDate, false);
                         } else {
                             newAssignment = new PermanentAssignment(user, selectedRole, metadata);
                         }
-                        system.assignmentManager.add(newAssignment);
+                        system.getAssignmentManager().add(newAssignment);
 
                         System.out.printf("Роль %s успешно назначена пользователю %s.\n", selectedRole.getName(), username);
+
+                        String details = String.format("role %s successfully assigned %s -> %s",
+                                selectedRole.getName(), system.getCurrentUser(), user.username());
+                        system.getAuditLog().log("ASSIGN_ROLE", system.getCurrentUser(),
+                                user.username(), details);
                     });
 
             parser.registerCommand("revoke-role",
@@ -642,21 +653,26 @@ public class CommandRegistry {
                                 "Введите номер назначения, которое хотите отозвать:");
                         int selectedAssignmentIdx = selectedAssignmentNumber - 1;
 
-                        List<RoleAssignment> roleAssignmentList = system.assignmentManager.findAll();
-                        system.assignmentManager.remove(roleAssignmentList.get(selectedAssignmentIdx));
+                        List<RoleAssignment> roleAssignmentList = system.getAssignmentManager().findAll();
+                        RoleAssignment selectedAssignment = roleAssignmentList.get(selectedAssignmentIdx);
+
+                        system.getAssignmentManager().revokeAssignment(selectedAssignment.assignmentId());
 
                         System.out.println("Роль успешно отозвана.");
+
+                        system.getAuditLog().log("REVOKE_ROLE", system.getCurrentUser(),
+                                username, null);
                     });
 
             parser.registerCommand("assignment-list",
                     "список всех назначений",
                     (scanner, system) -> {
-                        List<RoleAssignment> roleAssignmentList = system.assignmentManager.findAll();
+                        List<RoleAssignment> roleAssignmentList = system.getAssignmentManager().findAll();
                         AsciiTable table = new AsciiTable();
 
                         // table header
                         table.addRule();
-                        table.addRow("username", "role", "type", "status", "assigned at");
+                        table.addRow("username", "role", "type", "status", "assigned at", "assignment ID");
                         table.addRule();
 
                         // table rows
@@ -666,9 +682,10 @@ public class CommandRegistry {
                             String type = roleAssignment.assignmentType();
                             String status = roleAssignment.isActive() ? "Active" : "Inactive";
                             String assignedAt = roleAssignment.metadata().assignedAt();
+                            String assignmentId = roleAssignment.assignmentId();
 
 
-                            table.addRow(username, role.toString(), type, status, assignedAt);
+                            table.addRow(username, role.toString(), type, status, assignedAt, assignmentId);
                             table.addRule();
                         }
 
@@ -685,7 +702,7 @@ public class CommandRegistry {
                                 "Введите username:");
 
                         List<RoleAssignment> roleAssignmentList =
-                                system.assignmentManager.findByFilter(AssignmentFilters.byUsername(username));
+                                system.getAssignmentManager().findByFilter(AssignmentFilters.byUsername(username));
                         System.out.println("Назначения пользователя " + username + ":");
                         int n = 1;
                         for (RoleAssignment roleAssignment : roleAssignmentList) {
@@ -703,7 +720,7 @@ public class CommandRegistry {
                                 "Введите название роли:");
 
                         List<RoleAssignment> roleAssignmentList =
-                                system.assignmentManager.findByFilter(AssignmentFilters.byRoleName(roleName));
+                                system.getAssignmentManager().findByFilter(AssignmentFilters.byRoleName(roleName));
                         int n = 1;
                         for (RoleAssignment roleAssignment : roleAssignmentList) {
                             System.out.printf("\t%d. %s\n", n, roleAssignment.user().format());
@@ -715,7 +732,7 @@ public class CommandRegistry {
                     "только активные назначения",
                     (scanner, system) -> {
                         List<RoleAssignment> roleAssignmentList =
-                                system.assignmentManager.findByFilter(AssignmentFilters.activeOnly());
+                                system.getAssignmentManager().findByFilter(AssignmentFilters.activeOnly());
                         int n = 1;
                         for (RoleAssignment roleAssignment : roleAssignmentList) {
                             System.out.printf("\t%d. %s\n", n, roleAssignment.user().format());
@@ -728,7 +745,7 @@ public class CommandRegistry {
                     (scanner, system) -> {
                         String now = LocalDateTime.now().toString();
                         List<RoleAssignment> roleAssignmentList =
-                                system.assignmentManager.findByFilter(AssignmentFilters.expiringBefore(now));
+                                system.getAssignmentManager().findByFilter(AssignmentFilters.expiringBefore(now));
 
                         if (roleAssignmentList.isEmpty()) {
                             System.out.println("Нет ни одного истекшего временного назначения");
@@ -754,7 +771,7 @@ public class CommandRegistry {
                         String newExpirationDate = InputUtils.readDateInString(inputScanner,
                                 "Введите новый deadline:");
 
-                        system.assignmentManager.extendTemporaryAssignment(assignmentID, newExpirationDate);
+                        system.getAssignmentManager().extendTemporaryAssignment(assignmentID, newExpirationDate);
                     });
 
             parser.registerCommand("assignment-search", "поиск назначений по фильтрам", (scanner, system) -> {
@@ -775,7 +792,7 @@ public class CommandRegistry {
                     case 1 -> {
                         parser.executeCommand("user-list", inputScanner, system);
                         String username = InputUtils.readLine(inputScanner, "Имя пользователя:");
-                        Optional<User> optionalUser = system.userManager.findByUsername(username);
+                        Optional<User> optionalUser = system.getUserManager().findByUsername(username);
                         if (optionalUser.isEmpty()) {
                             yield null;
                         }
@@ -783,7 +800,7 @@ public class CommandRegistry {
                     }
                     case 2 -> {
                         String roleName = InputUtils.readLine(inputScanner, "Роль:");
-                        Optional<Role> optionalRole = system.roleManager.findByName(roleName);
+                        Optional<Role> optionalRole = system.getRoleManager().findByName(roleName);
                         if (optionalRole.isEmpty()) {
                             yield null;
                         }
@@ -799,7 +816,7 @@ public class CommandRegistry {
 
                 List<RoleAssignment> results = new ArrayList<>();
                 if (filter != null) {
-                    results = system.assignmentManager.findByFilter(filter);
+                    results = system.getAssignmentManager().findByFilter(filter);
                 }
                 if (results.isEmpty()) {
                     System.out.println("По данным фильтрам ничего не найдено");
@@ -825,14 +842,14 @@ public class CommandRegistry {
 
                         String username = InputUtils.readLine(inputScanner, "Введите username:");
 
-                        Optional<User> optionalUser = system.userManager.findByUsername(username);
+                        Optional<User> optionalUser = system.getUserManager().findByUsername(username);
                         if (optionalUser.isEmpty()) {
                             System.out.println("Пользователь с ником " + username + " не найден");
                             return;
                         }
                         User user = optionalUser.get();
 
-                        List<RoleAssignment> assignments = system.assignmentManager
+                        List<RoleAssignment> assignments = system.getAssignmentManager()
                                 .findByFilter(AssignmentFilters.byUser(user));
 
                         if (assignments.isEmpty()) {
@@ -876,16 +893,16 @@ public class CommandRegistry {
                         String resource = InputUtils.readLine(inputScanner,
                                 "Введите ресурс:");
 
-                        Optional<User> optionalUser = system.userManager.findByUsername(username);
+                        Optional<User> optionalUser = system.getUserManager().findByUsername(username);
                         if (optionalUser.isEmpty()) {
                             System.out.println("Пользователь с ником " + username + " не найден");
                             return;
                         }
                         User user = optionalUser.get();
 
-                        if (system.assignmentManager.userHasPermission(user, permissionName, resource)) {
+                        if (system.getAssignmentManager().userHasPermission(user, permissionName, resource)) {
                             System.out.println("YES. ");
-                            for (RoleAssignment a : system.assignmentManager.findByFilter(AssignmentFilters.byUser(user))) {
+                            for (RoleAssignment a : system.getAssignmentManager().findByFilter(AssignmentFilters.byUser(user))) {
                                 if (a.role().hasPermission(permissionName, resource)) {
                                     System.out.println("Из роли: " + a.role().getName());
                                     break;

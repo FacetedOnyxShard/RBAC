@@ -33,7 +33,7 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
 
     @Override
     public String assignmentType() {
-        return "TEMPORARY";
+        return Type.TEMPORARY.toString();
     }
 
     public void extend(String newExpirationDate) {

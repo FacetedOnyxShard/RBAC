@@ -8,6 +8,7 @@ import org.example.user.User;
 import org.example.user.UserManager;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class AssignmentManager implements Repository<RoleAssignment> {
@@ -147,8 +148,9 @@ public class AssignmentManager implements Repository<RoleAssignment> {
         if (assignment instanceof PermanentAssignment permanentAssignment) {
             permanentAssignment.revoke();
         } else if (assignment instanceof  TemporaryAssignment temporaryAssignment) {
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            temporaryAssignment.setExpiresAt(currentDateTime.toString());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String currentDateTime = LocalDateTime.now().format(formatter);
+            temporaryAssignment.setExpiresAt(currentDateTime);
         }
     }
 
