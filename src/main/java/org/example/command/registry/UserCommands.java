@@ -250,27 +250,12 @@ public class UserCommands {
                     int selectedFilterNumber = ConsoleUtils.promptChoice(inputScanner,
                             "Выберите фильтр (для выбора введите цифру)", options);
 
-                    searchLogic(selectedFilterNumber, inputScanner, system);
+                    List<UsernameFieldHelper> usernameFieldHelpers = List.of(UsernameFieldHelper.fromNumber(selectedFilterNumber));
+                    List<String> filterValues = new ArrayList<>();
+                    filterValues.add(get(usernameFieldHelpers.getFirst(), inputScanner));
+
+                    searchLogicForManyFilters(usernameFieldHelpers, filterValues, system);
                 });
-    }
-
-    private static void searchLogic(int selectedFilterNumber, Scanner scanner, RBACSystem system) {
-        UsernameFieldHelper usernameFieldHelper = UsernameFieldHelper.fromNumber(selectedFilterNumber);
-        String filterValue = get(usernameFieldHelper, scanner);
-        UserFilter filter = usernameFieldHelper.createFilter(filterValue);
-
-        List<User> userList = system.getUserManager().findByFilter(filter);
-
-        if (userList.isEmpty()) {
-            System.out.println("Пользователей по данным фильтрам не было найдено");
-            return;
-        }
-        System.out.println("Найденные пользователи:");
-        int n = 1;
-        for (User user : userList) {
-            System.out.printf("\t%d. %s\n", n, user.format());
-            ++n;
-        }
     }
 
     private static void searchLogicForManyFilters(List<UsernameFieldHelper> usernameFieldHelpers, List<String> filterValues, RBACSystem system) {
@@ -340,7 +325,6 @@ public class UserCommands {
     }
 
     private static String get(UsernameFieldHelper usernameFieldHelper, Scanner scanner) {
-        System.out.println(usernameFieldHelper.getMessage());
-        return scanner.nextLine();
+        return ConsoleUtils.promptString(scanner, usernameFieldHelper.getMessage(), true);
     }
 }

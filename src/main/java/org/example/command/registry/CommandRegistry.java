@@ -14,6 +14,7 @@ import org.example.user.User;
 import org.example.user.UserFilter;
 import org.example.user.UserFilters;
 import org.example.util.InputUtils;
+import org.example.util.ReportGenerator;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -109,6 +110,63 @@ public class CommandRegistry {
                     "Просмотр логов",
                     (scanner, system) -> {
                         system.getAuditLog().printLog();
+                    });
+
+            parser.registerCommand("report-users", "вывести/сохранить отчёт по пользователям",
+                    (scanner, system) -> {
+                        ReportGenerator reportGenerator = new ReportGenerator();
+
+                        String filepath = "rbac-reports/users.txt";
+
+                        try {
+                            String report = reportGenerator.generateUserReport(
+                                    system.getUserManager(),
+                                    system.getAssignmentManager()
+                            );
+
+                            reportGenerator.exportToFile(report, filepath);
+
+                        } catch (Exception e) {
+                            System.out.printf("Error generating user report: %s\n", e.getMessage());
+                        }
+                    });
+
+            parser.registerCommand("report-roles", "отчёт по ролям",
+                    (scanner, system) -> {
+                        ReportGenerator reportGenerator = new ReportGenerator();
+
+                        String filepath = "rbac-reports/roles.txt";
+
+                        try {
+                            String report = reportGenerator.generateRoleReport(
+                                    system.getRoleManager(),
+                                    system.getAssignmentManager()
+                            );
+
+                            reportGenerator.exportToFile(report, filepath);
+
+                        } catch (Exception e) {
+                            System.out.printf("Error generating role report: %s\n", e.getMessage());
+                        }
+                    });
+
+            parser.registerCommand("report-matrix", "Generate permission matrix (users × resources)",
+                    (scanner, system) -> {
+                        ReportGenerator reportGenerator = new ReportGenerator();
+
+                        String filepath = "rbac-reports/permission_matrix.txt";
+
+                        try {
+                            String report = reportGenerator.generatePermissionMatrix(
+                                    system.getUserManager(),
+                                    system.getAssignmentManager()
+                            );
+
+                            reportGenerator.exportToFile(report, filepath);
+
+                        } catch (Exception e) {
+                            System.out.printf("Error generating permission matrix: %s\n", e.getMessage());
+                        }
                     });
         }
     }

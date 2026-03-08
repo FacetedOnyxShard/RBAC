@@ -1,11 +1,13 @@
 package org.example.command.registry;
 
+import de.vandermeer.asciitable.AsciiTable;
 import org.example.assignment.RoleAssignment;
 import org.example.command.CommandParser;
 import org.example.core.Permission;
 import org.example.role.Role;
 import org.example.role.RoleFilter;
 import org.example.role.RoleFilters;
+import org.example.user.User;
 import org.example.util.InputUtils;
 
 import java.util.List;
@@ -18,11 +20,24 @@ public class RoleCommands {
                 "вывести список всех ролей",
                 (scanner, system) -> {
                     System.out.println("Список ролей:");
+
+                    AsciiTable table = new AsciiTable();
+                    table.addRule();
+                    table.addRow("Номер", "Название", "Количество прав", "ID");
+                    table.addRule();
+
                     int n = 1;
                     for (Role role : system.getRoleManager().findAll()) {
-                        System.out.printf("\t%d. Название: %s Количество прав: %d ID: %s\n", n, role.toString(), role.getPermissions().size(), role.getId());
+                        String roleName = role.getName();
+                        String permissionCount = Integer.toString(role.getPermissions().size());
+                        String id = role.getId();
+
+                        table.addRow(n, roleName, permissionCount, id);
+                        table.addRule();
                         ++n;
                     }
+
+                    System.out.println(table.render());
                 });
 
         parser.registerCommand("role-create",

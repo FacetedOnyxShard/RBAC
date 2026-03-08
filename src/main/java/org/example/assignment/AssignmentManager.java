@@ -88,6 +88,16 @@ public class AssignmentManager implements Repository<RoleAssignment> {
                 .toList();
     }
 
+    public List<RoleAssignment> findByUser(User user) {
+        if (user == null) {
+            return Collections.emptyList();
+        }
+        AssignmentFilter assignmentFilterByUser = AssignmentFilters.byUser(user);
+        return assignments.values().stream()
+                .filter(assignmentFilterByUser::test)
+                .toList();
+    }
+
     public List<RoleAssignment> findAll(AssignmentFilter filter, Comparator<RoleAssignment> sorter){
         return assignments.values().stream()
                 .filter(filter::test)
