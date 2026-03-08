@@ -12,6 +12,7 @@ import org.example.role.RoleFilters;
 import org.example.user.User;
 import org.example.user.UserFilter;
 import org.example.user.UserFilters;
+import org.example.util.AuditLog;
 import org.example.util.InputUtils;
 
 import java.time.LocalDateTime;
@@ -923,6 +924,12 @@ public class CommandRegistry {
                         scanner.close();
                         System.out.println("Остановка выполнения программы...");
                         System.exit(0);
+                    });
+
+            parser.registerCommand("audit-log",
+                    "Просмотр логов",
+                    (scanner, system) -> {
+                        system.getAuditLog().printLog();
                     });
         }
     }

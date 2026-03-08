@@ -7,11 +7,13 @@ import org.example.role.Role;
 import org.example.role.RoleManager;
 import org.example.user.User;
 import org.example.user.UserManager;
+import org.example.util.AuditLog;
 
 public class RBACSystem {
     public UserManager userManager;
     public RoleManager roleManager;
     public AssignmentManager assignmentManager;
+    private AuditLog auditLog;
     private String currentUser;
 
     public UserManager getUserManager() {
@@ -24,6 +26,10 @@ public class RBACSystem {
 
     public AssignmentManager getAssignmentManager() {
         return assignmentManager;
+    }
+
+    public AuditLog getAuditLog() {
+        return auditLog;
     }
 
     public String getCurrentUser() {

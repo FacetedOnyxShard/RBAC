@@ -48,6 +48,17 @@ public class ValidationUtils {
         return input.trim().replaceAll("\\s+", " ");
     }
 
+    public enum StringCase {
+        LOWER_CASE,
+        UPPER_CASE,
+    }
+
+    public static String normalizeString(String input, StringCase preferredCase) {
+        if (preferredCase == StringCase.LOWER_CASE) input = input.toLowerCase();
+        else input = input.toUpperCase();
+        return normalizeString(input);
+    }
+
     public static void requireNonNullEmpty(String value, String fieldName) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Поле " + fieldName + " не может быть пустым");
