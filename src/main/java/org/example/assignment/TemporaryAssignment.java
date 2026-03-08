@@ -2,8 +2,9 @@ package org.example.assignment;
 
 import org.example.role.Role;
 import org.example.user.User;
+import org.example.util.DateUtils;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 public class TemporaryAssignment extends AbstractRoleAssignment {
@@ -26,9 +27,8 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
 
     @Override
     public boolean isActive() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime deadline = LocalDateTime.parse(expiresAt);
-        return now.isBefore(deadline);
+        String now = DateUtils.getCurrentDate();
+        return DateUtils.isBefore(now, expiresAt);
     }
 
     @Override
@@ -45,18 +45,16 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
     }
 
     public String getTimeRemaining() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime deadline = LocalDateTime.parse(expiresAt);
+        LocalDate now = LocalDate.now();
+        LocalDate deadline = LocalDate.parse(expiresAt);
 
         if (isExpired()) {
             return "Expired";
         }
 
         long days = ChronoUnit.DAYS.between(now, deadline);
-        long hours = ChronoUnit.HOURS.between(now, deadline) % 24;
-        long minutes = ChronoUnit.MINUTES.between(now, deadline) % 60;
 
-        return String.format("%d days, %d hours, %d minutes", days, hours, minutes);
+        return String.format("%d days", days);
     }
 
     @Override

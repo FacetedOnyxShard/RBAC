@@ -3,6 +3,7 @@ package org.example.core;
 import org.example.assignment.AssignmentManager;
 import org.example.assignment.AssignmentMetadata;
 import org.example.assignment.PermanentAssignment;
+import org.example.assignment.TemporaryAssignment;
 import org.example.role.Role;
 import org.example.role.RoleManager;
 import org.example.user.User;
@@ -121,7 +122,7 @@ public class RBACSystem {
         userManager.add(creatorUser);
         assignmentManager.add(creatorAssignment);
 
-        
+
 
 //        1. Менеджер контента - может управлять статьями и медиафайлами
         Role contentManager = new Role("ContentManager", "manage content and media");
@@ -165,7 +166,7 @@ public class RBACSystem {
         User moderatorUser = new User("elena_wilson", "Elena Wilson", "elena.w@moderation.com");
 
         AssignmentMetadata moderatorMetadata = AssignmentMetadata.now("security_team", "night shift moderator");
-        PermanentAssignment moderatorAssignment = new PermanentAssignment(moderatorUser, moderator, moderatorMetadata);
+        TemporaryAssignment moderatorAssignment = new TemporaryAssignment(moderatorUser, moderator, moderatorMetadata, "2026-03-09", false);
 
         roleManager.add(moderator);
         roleManager.addPermissionToRole(moderator.getName(), moderatorBlockUsers);

@@ -3,7 +3,9 @@ package org.example.assignment;
 
 import org.example.role.Role;
 import org.example.user.User;
+import org.example.util.DateUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public abstract class AssignmentFilters implements AssignmentFilter {
@@ -40,19 +42,14 @@ public abstract class AssignmentFilters implements AssignmentFilter {
     }
 
     public static AssignmentFilter assignedAfter(String date)  {
-        return assignment -> {
-            LocalDateTime assignmentDate =  LocalDateTime.parse(assignment.metadata().assignedAt());
-            LocalDateTime selectedDate = LocalDateTime.parse(date);
-            return assignmentDate.isAfter(selectedDate);
-        };
+        return assignment ->
+                DateUtils.isAfter(assignment.metadata().assignedAt(), date);
     }
 
     public static AssignmentFilter expiringBefore(String date) {
         return assignment -> {
             if (assignment instanceof TemporaryAssignment temporaryAssignment) {
-                LocalDateTime expirationDate = LocalDateTime.parse(temporaryAssignment.getExpiresAt());
-                LocalDateTime selectedDate = LocalDateTime.parse(date);
-                return expirationDate.isBefore(selectedDate);
+                return DateUtils.isBefore(temporaryAssignment.getExpiresAt(), date);
             }
             return false;
         };

@@ -5,7 +5,10 @@ import org.example.assignment.*;
 import org.example.command.CommandParser;
 import org.example.role.Role;
 import org.example.user.User;
+import org.example.util.ConsoleUtils;
+import org.example.util.DateUtils;
 import org.example.util.InputUtils;
+import org.example.util.ValidationUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,24 +26,31 @@ public class AssignmentCommands {
                     parser.executeCommand("user-list", new Scanner(""), system);
 
                     String username;
-                    System.out.println("Введите username пользователя, которому хотите назначить роль:");
-                    username = inputScanner.nextLine(); // TODO
+                    username = ConsoleUtils.promptString(inputScanner,
+                            "Введите username пользователя, которому хотите назначить роль:",
+                            true);
 
                     parser.executeCommand("role-list", inputScanner, system);
-                    System.out.println("Введите номер желаемой роли:");
-                    int selectedRoleNumber = Integer.parseInt(inputScanner.nextLine());
-                    int selectedRoleIdx = selectedRoleNumber - 1;
 
-                    int selectedAssignmentType = InputUtils.readInt(inputScanner, "Выберите тип назначения (0 - постоянное, 1 - временное):"); // TODO: проверка что это 0 или 1
+                    int selectedRoleNumber = ConsoleUtils.promptInt(inputScanner,
+                            "Введите номер желаемой роли:", 1, system.getRoleManager().count());
+                    final int selectedRoleIdx = selectedRoleNumber - 1;
+
+                    final int selectedAssignmentType = ConsoleUtils.promptInt(inputScanner,
+                            "Выберите тип назначения (0 - постоянное, 1 - временное):", 0, 1);
 
                     String expirationDate = null;
                     if (selectedAssignmentType == 1) {
-                        System.out.println("Введите дату истечения (формат yyyy-MM-dd HH:mm):");
-                        expirationDate = inputScanner.nextLine();
+                        expirationDate = ConsoleUtils.promptString(inputScanner,
+                                "Введите дату истечения (формат yyyy-MM-dd):", true);
+
+                        if (!ValidationUtils.isValidDate(expirationDate)) {
+                            throw new RuntimeException("Incorrect date format");
+                        }
                     }
 
-                    System.out.println("Укажите причину назначения:");
-                    String reason = inputScanner.nextLine();
+                    String reason = ConsoleUtils.promptString(inputScanner,
+                            "Укажите причину назначения:", true);
 
                     AbstractRoleAssignment newAssignment;
                     AssignmentMetadata metadata = AssignmentMetadata.now(system.getCurrentUser(), reason);
@@ -77,17 +87,35 @@ public class AssignmentCommands {
 
                     parser.executeCommand("assignment-list", new Scanner(""), system);
 
-                    String username = InputUtils.readLine(inputScanner,
-                            "Введите username пользователя у которого хотите отзвать роль:");
+                    String username = ConsoleUtils.promptString(inputScanner,
+                            "Введите username пользователя у которого хотите отзвать роль:", true);
 
-                    parser.executeCommand("assignment-list-user", inputScanner, system); // TODO
+                    List<RoleAssignment> roleAssignmentListByUsername =
+                            system.getAssignmentManager().findByFilter(AssignmentFilters.byUsername(username));
 
-                    int selectedAssignmentNumber = InputUtils.readInt(inputScanner,
-                            "Введите номер назначения, которое хотите отозвать:");
+                    if (roleAssignmentListByUsername.isEmpty()) {
+                        System.out.println("У этого пользователя нет назначений");
+                        return;
+                    }
+
+                    System.out.println("Назначения пользователя " + username + ":");
+                    int n = 1;
+                    for (RoleAssignment roleAssignment : roleAssignmentListByUsername) {
+                        System.out.printf("\t%d. %s\n", n, roleAssignment.metadata().format());
+                        ++n;
+                    }
+
+                    int selectedAssignmentNumber;
+                    try {
+                        selectedAssignmentNumber = ConsoleUtils.promptInt(inputScanner,
+                                "Введите номер назначения, которое хотите отозвать:",
+                                1, roleAssignmentListByUsername.size());
+                    } catch (RuntimeException e) {
+                        throw new RuntimeException(e);
+                    }
                     int selectedAssignmentIdx = selectedAssignmentNumber - 1;
 
-                    List<RoleAssignment> roleAssignmentList = system.getAssignmentManager().findAll();
-                    RoleAssignment selectedAssignment = roleAssignmentList.get(selectedAssignmentIdx);
+                    RoleAssignment selectedAssignment = roleAssignmentListByUsername.get(selectedAssignmentIdx);
 
                     system.getAssignmentManager().revokeAssignment(selectedAssignment.assignmentId());
 
@@ -131,8 +159,8 @@ public class AssignmentCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String username = InputUtils.readLine(inputScanner,
-                            "Введите username:");
+                    String username = ConsoleUtils.promptString(inputScanner,
+                            "Введите username:", true);
 
                     List<RoleAssignment> roleAssignmentList =
                             system.getAssignmentManager().findByFilter(AssignmentFilters.byUsername(username));
@@ -149,8 +177,8 @@ public class AssignmentCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String roleName = InputUtils.readLine(inputScanner,
-                            "Введите название роли:");
+                    String roleName = ConsoleUtils.promptString(inputScanner,
+                            "Введите название роли:", true);
 
                     List<RoleAssignment> roleAssignmentList =
                             system.getAssignmentManager().findByFilter(AssignmentFilters.byRoleName(roleName));
@@ -176,7 +204,7 @@ public class AssignmentCommands {
         parser.registerCommand("assignment-expired",
                 "истёкшие временные назначения",
                 (scanner, system) -> {
-                    String now = LocalDateTime.now().toString();
+                    String now = DateUtils.getCurrentDate();
                     List<RoleAssignment> roleAssignmentList =
                             system.getAssignmentManager().findByFilter(AssignmentFilters.expiringBefore(now));
 
@@ -198,8 +226,10 @@ public class AssignmentCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String assignmentID = InputUtils.readLine(inputScanner,
-                            "Введите assignment id:");
+                    parser.executeCommand("assignment-list", inputScanner, system);
+
+                    String assignmentID = ConsoleUtils.promptString(inputScanner,
+                            "Введите assignment id:", true);
 
                     String newExpirationDate = InputUtils.readDateInString(inputScanner,
                             "Введите новый deadline:");
@@ -224,7 +254,7 @@ public class AssignmentCommands {
             AssignmentFilter filter = switch (InputUtils.readInt(inputScanner, "Выберите номер фильтра:")) {
                 case 1 -> {
                     parser.executeCommand("user-list", inputScanner, system);
-                    String username = InputUtils.readLine(inputScanner, "Имя пользователя:");
+                    String username = ConsoleUtils.promptString(inputScanner, "Имя пользователя:", true);
                     Optional<User> optionalUser = system.getUserManager().findByUsername(username);
                     if (optionalUser.isEmpty()) {
                         yield null;
@@ -232,18 +262,18 @@ public class AssignmentCommands {
                     yield AssignmentFilters.byUser(optionalUser.get());
                 }
                 case 2 -> {
-                    String roleName = InputUtils.readLine(inputScanner, "Роль:");
+                    String roleName = ConsoleUtils.promptString(inputScanner, "Роль:", true);
                     Optional<Role> optionalRole = system.getRoleManager().findByName(roleName);
                     if (optionalRole.isEmpty()) {
                         yield null;
                     }
                     yield AssignmentFilters.byRole(optionalRole.get());
                 }
-                case 3 -> AssignmentFilters.byType(InputUtils.readLine(inputScanner, "Тип:"));
+                case 3 -> AssignmentFilters.byType(ConsoleUtils.promptString(inputScanner, "Тип:", true));
                 case 4 -> AssignmentFilters.activeOnly();
                 case 5 -> AssignmentFilters.inactiveOnly();
-                case 6 -> AssignmentFilters.assignedAfter(InputUtils.readLine(inputScanner, "Дата:"));
-                case 7 -> AssignmentFilters.expiringBefore(InputUtils.readLine(inputScanner, "Дата:"));
+                case 6 -> AssignmentFilters.assignedAfter(ConsoleUtils.promptString(inputScanner, "Дата:", true));
+                case 7 -> AssignmentFilters.expiringBefore(ConsoleUtils.promptString(inputScanner, "Дата:", true));
                 default -> null;
             };
 

@@ -1,5 +1,8 @@
 package org.example.assignment;
 
+import org.example.util.DateUtils;
+import org.example.util.ValidationUtils;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -15,8 +18,8 @@ public record AssignmentMetadata(String assignedBy, String assignedAt, String re
     }
 
     public static AssignmentMetadata now(String assignedBy, String reason) {
-        String assignedNowISO = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        return new AssignmentMetadata(assignedBy, assignedNowISO, reason);
+        String assignedNow = DateUtils.getCurrentDate();
+        return new AssignmentMetadata(assignedBy, assignedNow, reason);
     }
 
     public String format() {

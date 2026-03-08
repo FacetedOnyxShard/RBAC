@@ -1,5 +1,6 @@
 package org.example.util;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -28,14 +29,13 @@ public class ValidationUtils {
     }
 
     public static boolean isValidDate(String date) {
-//      формат даты из RBAC_4 2026-02-07 19:00:00
-        if (date == null || date.length() != "2026-02-07 19:00:00".length()) {
+        if (date == null || date.length() != "2026-02-07".length()) {
             return false;
         }
 
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime.parse(date, formatter);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate.parse(date, formatter);
         } catch (Exception e) {
             return false;
         }

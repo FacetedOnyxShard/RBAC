@@ -48,11 +48,16 @@ public class CommandParser {
 
         Scanner commandArgs = new Scanner(arguments);
 
-        try {
-            Command command = commands.get(commandName);
-            command.execute(commandArgs, system);
-        } catch (Exception e) {
+        Command command;
+        command = commands.get(commandName);
+        if (command == null) {
             throw new RuntimeException("такой команды не существует");
+        }
+
+        try {
+            command.execute(commandArgs, system);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
     }
 }

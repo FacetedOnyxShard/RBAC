@@ -6,6 +6,7 @@ import org.example.role.Role;
 import org.example.role.RoleManager;
 import org.example.user.User;
 import org.example.user.UserManager;
+import org.example.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +18,7 @@ public class AssignmentManager implements Repository<RoleAssignment> {
     private RoleManager roleManager;
 
     public AssignmentManager() {
-        this.assignments = new HashMap<>();
+        this.assignments = new LinkedHashMap<>();
     }
 
     public void setUserManager(UserManager userManager) {
@@ -158,9 +159,8 @@ public class AssignmentManager implements Repository<RoleAssignment> {
         if (assignment instanceof PermanentAssignment permanentAssignment) {
             permanentAssignment.revoke();
         } else if (assignment instanceof  TemporaryAssignment temporaryAssignment) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String currentDateTime = LocalDateTime.now().format(formatter);
-            temporaryAssignment.setExpiresAt(currentDateTime);
+            String currentDate = DateUtils.getCurrentDate();
+            temporaryAssignment.setExpiresAt(currentDate);
         }
     }
 

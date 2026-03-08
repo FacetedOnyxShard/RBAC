@@ -14,24 +14,11 @@ public class Main {
         programInterface();
     }
 
-    private static void test() {
-        Scanner scanner1 = new Scanner("user-list --username hikaruvi --email yes@gmail.com");
-        String command = "user-list\n";
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.next();
-        scanner.skip("\n\r");
-        System.out.println(scanner.hasNext());
-    }
-
     private static void programInterface() {
-//        Обязательные изменения
-//
-
 //        Необязательные изменения
 //          1. убрать ввод названия роли при добавлении прав только что созданной роли.
 //          2. сделать чтобы роль admin нельзя было удалять и нельзя было удалить пользователя с этой ролью,
 //          если он 1.
-//          3. сделать нормальную обработку ошибки неверной команды
 
 
         RBACSystem system = new RBACSystem();
