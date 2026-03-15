@@ -11,6 +11,7 @@ import org.example.util.DateUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AssignmentManager implements Repository<RoleAssignment> {
     Map<String, RoleAssignment> assignments; // (ключ — assignmentId)
@@ -139,18 +140,10 @@ public class AssignmentManager implements Repository<RoleAssignment> {
         AssignmentFilter userFilter =  AssignmentFilters.byUser(user);
         AssignmentFilter activeFilter = AssignmentFilters.activeOnly();
 
-        Optional<RoleAssignment> neededAssignment = assignments.values().stream()
-                .filter(activeFilter.and(userFilter)::test)
-                .findFirst();
-
-        Set<Permission> result = Collections.emptySet();
-
-        if (neededAssignment.isPresent()) {
-            RoleAssignment assignment = neededAssignment.get();
-            result = assignment.role().getPermissions();
-        }
-
-        return result;
+        return assignments.values().stream()
+                .filter(userFilter.and(activeFilter)::test)
+                .flatMap(assignment -> assignment.role().getPermissions().stream())
+                .collect(Collectors.toSet());
     }
 
     public void revokeAssignment(String assignmentId) {

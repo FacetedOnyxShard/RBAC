@@ -30,12 +30,28 @@ public class AssignmentCommands {
 
                     parser.executeCommand("role-list", inputScanner, system);
 
-                    int selectedRoleNumber = ConsoleUtils.promptInt(inputScanner,
-                            "Введите номер желаемой роли:", 1, system.getRoleManager().count());
+                    int selectedRoleNumber = 0;
+                    while (true) {
+                        try {
+                            selectedRoleNumber = ConsoleUtils.promptInt(inputScanner,
+                                    "Введите номер желаемой роли:", 1, system.getRoleManager().count());
+                            break;
+                        } catch (Exception e) {
+                            System.out.println("Выбранный номер должен быть в диапазоне от " + 1 + " до " +  system.getRoleManager().count());
+                        }
+                    }
                     final int selectedRoleIdx = selectedRoleNumber - 1;
 
-                    final int selectedAssignmentType = ConsoleUtils.promptInt(inputScanner,
-                            "Выберите тип назначения (0 - постоянное, 1 - временное):", 0, 1);
+                    int selectedAssignmentType = 0;
+                    while (true) {
+                        try {
+                            selectedAssignmentType = ConsoleUtils.promptInt(inputScanner,
+                                    "Выберите тип назначения (0 - постоянное, 1 - временное):", 0, 1);
+                            break;
+                        } catch (Exception e) {
+                            System.out.println("Выбранный номер должен быть в диапазоне от " + 0 + " до " +  1);
+                        }
+                    }
 
                     String expirationDate = null;
                     if (selectedAssignmentType == 1) {
@@ -253,7 +269,16 @@ public class AssignmentCommands {
                         7. До даты
                         """);
 
-            AssignmentFilter filter = switch (ConsoleUtils.promptInt(inputScanner, "Выберите номер фильтра:", 1, 7)) {
+            int selectedFilterNumber = 0;
+            while (true) {
+                try {
+                    selectedFilterNumber = ConsoleUtils.promptInt(inputScanner, "Выберите номер фильтра:", 1, 7);
+                    break;
+                } catch (Exception e) {
+                    System.out.println("Выбранный номер должен быть в диапазоне от " + 1 + " до " + 7);
+                }
+            }
+            AssignmentFilter filter = switch (selectedFilterNumber) {
                 case 1 -> {
                     parser.executeCommand("user-list", inputScanner, system);
                     String username = ConsoleUtils.promptString(inputScanner, "Имя пользователя:", true);

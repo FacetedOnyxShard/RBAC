@@ -224,7 +224,15 @@ public class RoleCommands {
                         ++i;
                     }
 
-                    int selectedFilterNumber = ConsoleUtils.promptInt(inputScanner, "Введите номер:", 1, options.length);
+                    int selectedFilterNumber = 0;
+                    while (true) {
+                        try {
+                            selectedFilterNumber = ConsoleUtils.promptInt(inputScanner, "Введите номер:", 1, options.length);
+                            break;
+                        } catch (Exception e) {
+                            System.out.println("Выбранный номер должен быть в диапазоне от " + 1 + " до " + options.length);
+                        }
+                    }
 
                     RoleFilter filter = null;
                     List<Role> roleList = null;

@@ -114,7 +114,7 @@ public class RBACSystem {
 
         AssignmentMetadata creatorMetadata =
                 AssignmentMetadata.now("system", "no reason");
-        PermanentAssignment creatorAssignment = new PermanentAssignment(creatorUser, admin, creatorMetadata);
+        PermanentAssignment creatorAssignment = new PermanentAssignment(creatorUser, creator, creatorMetadata);
 
         roleManager.add(creator);
         String creatorName = creator.getName();

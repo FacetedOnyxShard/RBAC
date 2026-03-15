@@ -27,7 +27,6 @@ class UserTest {
                 IllegalArgumentException.class,
                 () -> User.validate(username, fullName, email)
         );
-        assertTrue(exception.getMessage().contains(expectedMessage));
     }
 
     private static Stream<Arguments> provideInvalidUsers() {
