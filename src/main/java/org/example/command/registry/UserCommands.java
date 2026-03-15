@@ -9,7 +9,6 @@ import org.example.user.User;
 import org.example.user.UserFilter;
 import org.example.user.UserFilters;
 import org.example.util.ConsoleUtils;
-import org.example.util.InputUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -101,7 +100,7 @@ public class UserCommands {
 
     private void userViewLogic(Scanner scanner, RBACSystem system)   {
         Scanner inputScanner = new Scanner(System.in);
-        String username = InputUtils.readLine(inputScanner, UsernameFieldHelper.USERNAME.getMessage());
+        String username = ConsoleUtils.promptString(inputScanner, UsernameFieldHelper.USERNAME.getMessage(), true);
 
         Optional<User> userOptional = system.getUserManager().findByUsername(username);
 

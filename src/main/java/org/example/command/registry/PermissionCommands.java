@@ -5,7 +5,7 @@ import org.example.assignment.RoleAssignment;
 import org.example.command.CommandParser;
 import org.example.core.Permission;
 import org.example.user.User;
-import org.example.util.InputUtils;
+import org.example.util.ConsoleUtils;
 
 import java.util.*;
 
@@ -16,7 +16,7 @@ public class PermissionCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String username = InputUtils.readLine(inputScanner, "Введите username:");
+                    String username = ConsoleUtils.promptString(inputScanner, "Введите username:", true);
 
                     Optional<User> optionalUser = system.getUserManager().findByUsername(username);
                     if (optionalUser.isEmpty()) {
@@ -60,14 +60,14 @@ public class PermissionCommands {
 
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String username = InputUtils.readLine(inputScanner,
-                            "Введите username:");
+                    String username = ConsoleUtils.promptString(inputScanner,
+                            "Введите username:", true);
 
-                    String permissionName = InputUtils.readLine(inputScanner,
-                            "Введите наименование права:");
+                    String permissionName = ConsoleUtils.promptString(inputScanner,
+                            "Введите наименование права:", true);
 
-                    String resource = InputUtils.readLine(inputScanner,
-                            "Введите ресурс:");
+                    String resource = ConsoleUtils.promptString(inputScanner,
+                            "Введите ресурс:", true);
 
                     Optional<User> optionalUser = system.getUserManager().findByUsername(username);
                     if (optionalUser.isEmpty()) {

@@ -7,8 +7,7 @@ import org.example.core.Permission;
 import org.example.role.Role;
 import org.example.role.RoleFilter;
 import org.example.role.RoleFilters;
-import org.example.user.User;
-import org.example.util.InputUtils;
+import org.example.util.ConsoleUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +53,7 @@ public class RoleCommands {
                             newRole = new Role(name, description);
                             system.getRoleManager().add(newRole);
 
-                            while (InputUtils.confirm(inputScanner, "Хотите добавить новое право")) {
+                            while (ConsoleUtils.promptYesNo(inputScanner, "Хотите добавить новое право ?")) {
                                 parser.executeCommand("role-add-permission", inputScanner, system);
                             }
                             break;
@@ -225,26 +224,22 @@ public class RoleCommands {
                         ++i;
                     }
 
-                    int selectedFilterNumber = InputUtils.readInt(inputScanner, "Введите номер:");
-
-                    if (selectedFilterNumber < 1 || selectedFilterNumber > options.length) {
-                        throw new RuntimeException();
-                    }
+                    int selectedFilterNumber = ConsoleUtils.promptInt(inputScanner, "Введите номер:", 1, options.length);
 
                     RoleFilter filter = null;
                     List<Role> roleList = null;
                     switch (selectedFilterNumber) {
                         case 1:
-                            String name = InputUtils.readLine(inputScanner, "Введите имя роли или его часть:");
+                            String name = ConsoleUtils.promptString(inputScanner, "Введите имя роли или его часть:", true);
                             filter = RoleFilters.byNameContains(name);
                             break;
                         case 2:
-                            String permissionName = InputUtils.readLine(inputScanner, "Введите название права:");
-                            String resource = InputUtils.readLine(inputScanner, "Введите ресурс:");
+                            String permissionName = ConsoleUtils.promptString(inputScanner, "Введите название права:", true);
+                            String resource = ConsoleUtils.promptString(inputScanner, "Введите ресурс:", true);
                             roleList = system.getRoleManager().findRolesWithPermission(permissionName, resource);
                             break;
                         case 3:
-                            int n = InputUtils.readInt(inputScanner, "Введите минимальное количество прав для роли:");
+                            int n = ConsoleUtils.promptInt(inputScanner, "Введите минимальное количество прав для роли:", 0, Integer.MAX_VALUE);
                             filter = RoleFilters.hasAtLeastNPermissions(n);
                             break;
                     }

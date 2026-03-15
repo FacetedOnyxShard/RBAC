@@ -7,10 +7,8 @@ import org.example.role.Role;
 import org.example.user.User;
 import org.example.util.ConsoleUtils;
 import org.example.util.DateUtils;
-import org.example.util.InputUtils;
 import org.example.util.ValidationUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -231,8 +229,12 @@ public class AssignmentCommands {
                     String assignmentID = ConsoleUtils.promptString(inputScanner,
                             "Введите assignment id:", true);
 
-                    String newExpirationDate = InputUtils.readDateInString(inputScanner,
-                            "Введите новый deadline:");
+                    String newExpirationDate = ConsoleUtils.promptString(inputScanner,
+                            "Введите новый deadline:", true);
+
+                    if (!ValidationUtils.isValidDate(newExpirationDate)) {
+                        throw new RuntimeException("Incorrect date format");
+                    }
 
                     system.getAssignmentManager().extendTemporaryAssignment(assignmentID, newExpirationDate);
                 });
@@ -251,7 +253,7 @@ public class AssignmentCommands {
                         7. До даты
                         """);
 
-            AssignmentFilter filter = switch (InputUtils.readInt(inputScanner, "Выберите номер фильтра:")) {
+            AssignmentFilter filter = switch (ConsoleUtils.promptInt(inputScanner, "Выберите номер фильтра:", 1, 7)) {
                 case 1 -> {
                     parser.executeCommand("user-list", inputScanner, system);
                     String username = ConsoleUtils.promptString(inputScanner, "Имя пользователя:", true);

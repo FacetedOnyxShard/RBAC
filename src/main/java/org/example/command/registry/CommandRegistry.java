@@ -1,26 +1,14 @@
 package org.example.command.registry;
 
-import de.vandermeer.asciitable.AsciiTable;
 import org.example.assignment.*;
-import org.example.assignment.PermanentAssignment;
 import org.example.command.CommandParser;
-import org.example.core.Permission;
 import org.example.core.RBACSystem;
 import org.example.role.Role;
-import org.example.assignment.TemporaryAssignment;
-import org.example.role.RoleFilter;
-import org.example.role.RoleFilters;
 import org.example.user.User;
-import org.example.user.UserFilter;
-import org.example.user.UserFilters;
-import org.example.util.InputUtils;
 import org.example.util.ReportGenerator;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class CommandRegistry {
     public CommandRegistry(CommandParser parser) {
