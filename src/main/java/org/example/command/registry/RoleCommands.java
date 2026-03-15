@@ -99,8 +99,8 @@ public class RoleCommands {
                     String newName = getName(inputScanner);
 
                     Role role = optionalRole.get();
-                    role.setName(newName);
                     role.setDescription(description);
+                    system.getRoleManager().updateRoleName(name, newName);
                 });
 
         parser.registerCommand("role-delete",

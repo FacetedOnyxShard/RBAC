@@ -14,8 +14,6 @@ public class Role {
     private String description;
     private final Set<Permission> permissions;
 
-    private static final Set<String> usedNames = new HashSet<>();
-
     public Role(String name) {
         this(name, null, null);
     }
@@ -31,22 +29,11 @@ public class Role {
 
         String transformedName = name.trim();
 
-        synchronized (usedNames) {
-            if (usedNames.contains(transformedName)) {
-                throw new IllegalArgumentException("This name already exists: " + transformedName);
-            }
-            usedNames.add(transformedName);
-        }
-
         UUID uuid = UUID.randomUUID();
         this.id = "role_" + uuid;
         this.name = transformedName;
         this.description = description;
         this.permissions = permissions == null ? createDefaultSet() : permissions;
-    }
-
-    public Set<String> getUsedNames() {
-        return usedNames;
     }
 
     public String getId() {

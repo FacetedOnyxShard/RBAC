@@ -85,7 +85,7 @@ public class UserCommands {
             String email = ConsoleUtils.promptString(inputScanner, UsernameFieldHelper.EMAIL.getMessage(), true);
 
             try {
-                newUser = new User(username, fullName, email);
+                newUser = User.validate(username, fullName, email);
                 break;
             } catch (Exception e) {
                 System.out.println("Не получилось создать пользователя. Ошибка: " + e.getMessage());

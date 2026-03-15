@@ -40,16 +40,25 @@ public class RoleManager implements Repository<Role> {
             return false;
         }
 
-        if (!rolesById.remove(item.getId(), item)) {
+        if (!rolesById.containsKey(item.getId()) ||
+                !rolesByNameIdx.containsKey(item.getName())) {
             return false;
         }
 
-        if (!rolesByNameIdx.remove(item.getName(), item)) {
-            return false;
+        rolesById.remove(item.getId(), item);
+        rolesByNameIdx.remove(item.getName(), item);
+        return true;
+    }
+
+    public void updateRoleName(String oldName, String newName) {
+        Role role = findByName(oldName).orElseThrow(() -> new IllegalArgumentException("Role not found: " + oldName));
+        if (rolesByNameIdx.containsKey(newName) && !oldName.equals(newName)) {
+            throw new IllegalArgumentException("Role with new name already exists: " + newName);
         }
 
-        Set<String> usedNames = item.getUsedNames();
-        return usedNames.remove(item.getName());
+        rolesByNameIdx.remove(oldName);
+        role.setName(newName);
+        rolesByNameIdx.put(newName, role);
     }
 
     @Override
