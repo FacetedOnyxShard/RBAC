@@ -56,7 +56,6 @@ public class ConsoleUtils {
                 return selectedNum;
             } catch (Exception e) {
                 System.out.println("Число некорректно\n");
-                System.out.println(selectMessage);
             }
         }
     }

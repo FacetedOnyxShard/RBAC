@@ -173,6 +173,8 @@ public class AssignmentCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
+                    parser.executeCommand("user-list", scanner, system);
+
                     String username = ConsoleUtils.promptString(inputScanner,
                             "Введите username:", true);
 
@@ -210,7 +212,7 @@ public class AssignmentCommands {
                             system.getAssignmentManager().findByFilter(AssignmentFilters.activeOnly());
                     int n = 1;
                     for (RoleAssignment roleAssignment : roleAssignmentList) {
-                        System.out.printf("\t%d. %s\n", n, roleAssignment.user().format());
+                        System.out.printf("\t%d. User: %s; Role: %s\n", n, roleAssignment.user().username(), roleAssignment.role().toString());
                         ++n;
                     }
                 });
@@ -230,7 +232,7 @@ public class AssignmentCommands {
                     System.out.println("Список истекших временных назначений");
                     int n = 1;
                     for (RoleAssignment roleAssignment : roleAssignmentList) {
-                        System.out.printf("\t%d. %s\n", n, roleAssignment.user().format());
+                        System.out.printf("\t%d. User: %s; Role: %s\n", n, roleAssignment.user().username(), roleAssignment.role().toString());
                         ++n;
                     }
                 });
@@ -246,13 +248,15 @@ public class AssignmentCommands {
                             "Введите assignment id:", true);
 
                     String newExpirationDate = ConsoleUtils.promptString(inputScanner,
-                            "Введите новый deadline:", true);
+                            "Введите новый deadline (yyyy-MM-dd):", true);
 
                     if (!ValidationUtils.isValidDate(newExpirationDate)) {
                         throw new RuntimeException("Incorrect date format");
                     }
 
                     system.getAssignmentManager().extendTemporaryAssignment(assignmentID, newExpirationDate);
+
+                    System.out.println("Назначение продлено успешно");
                 });
 
         parser.registerCommand("assignment-search", "поиск назначений по фильтрам", (scanner, system) -> {

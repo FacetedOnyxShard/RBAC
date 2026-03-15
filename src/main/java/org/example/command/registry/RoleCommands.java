@@ -164,6 +164,8 @@ public class RoleCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
+                    parser.executeCommand("role-list", scanner, system);
+
                     String name = ConsoleUtils.promptString(inputScanner,
                             "Введите название роли: ", true);
 
@@ -182,6 +184,8 @@ public class RoleCommands {
                 "удалить право из роли",
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
+
+                    parser.executeCommand("role-list", scanner, system);
 
                     String name = ConsoleUtils.promptString(inputScanner,
                             "Введите название роли: ", true);
@@ -217,7 +221,7 @@ public class RoleCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String[] options = {"by name (contains)", "by permission", "by min count permission"};
+                    String[] options = {"По имени (содержит)", "По наличию конкретного права", "По минимальному количеству прав"};
                     int i = 1;
                     for (String option : options) {
                         System.out.println("\t" + i + ". " + option);

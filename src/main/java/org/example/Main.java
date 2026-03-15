@@ -19,6 +19,7 @@ public class Main {
 //          2. сделать чтобы роль admin нельзя было удалять и нельзя было удалить пользователя с этой ролью,
 //          если он 1.
 //
+//
 //        user-search по email ищет также и по домену
 
         RBACSystem system = new RBACSystem();
