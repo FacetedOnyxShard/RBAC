@@ -16,10 +16,10 @@ public class Main {
 
     private static void programInterface() {
 //        Необязательные изменения
-//          1. убрать ввод названия роли при добавлении прав только что созданной роли.
 //          2. сделать чтобы роль admin нельзя было удалять и нельзя было удалить пользователя с этой ролью,
 //          если он 1.
-
+//
+//        user-search по email ищет также и по домену
 
         RBACSystem system = new RBACSystem();
         system.initialize();

@@ -135,7 +135,7 @@ public class UserCommands {
         Scanner inputScanner = new Scanner(System.in);
 
         while (true) {
-            parser.executeCommand("user-list", inputScanner, system);
+            parser.executeCommand("user-list", scanner, system);
 
             String username = ConsoleUtils.promptString(inputScanner,
                     UsernameFieldHelper.USERNAME.getMessage(), true);

@@ -4,6 +4,7 @@ import de.vandermeer.asciitable.AsciiTable;
 import org.example.assignment.RoleAssignment;
 import org.example.command.CommandParser;
 import org.example.core.Permission;
+import org.example.core.RBACSystem;
 import org.example.role.Role;
 import org.example.role.RoleFilter;
 import org.example.role.RoleFilters;
@@ -46,15 +47,17 @@ public class RoleCommands {
 
                     Role newRole;
                     while (true) {
-                        String name = getName(inputScanner);
-                        String description = getDescription(inputScanner);
+                        String name = ConsoleUtils.promptString(inputScanner,
+                                "Введите название для роли, которую хотите создать: ", true);
+                        String description = ConsoleUtils.promptString(inputScanner,
+                                "Введите описание роли:", true);
 
                         try {
                             newRole = new Role(name, description);
                             system.getRoleManager().add(newRole);
 
                             while (ConsoleUtils.promptYesNo(inputScanner, "Хотите добавить новое право ?")) {
-                                parser.executeCommand("role-add-permission", inputScanner, system);
+                                roleAddPermissionMainLogic(inputScanner, system, newRole);
                             }
                             break;
                         } catch (Exception e) {
@@ -70,7 +73,10 @@ public class RoleCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String name = getName(inputScanner);
+                    parser.executeCommand("role-list", scanner, system);
+
+                    String name = ConsoleUtils.promptString(inputScanner,
+                            "Введите название роли:", true);
 
                     Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                     if (optionalRole.isEmpty()) {
@@ -87,20 +93,30 @@ public class RoleCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String name = getName(inputScanner);
-                    String description = getDescription(inputScanner);
+                    parser.executeCommand("role-list", scanner, system);
+
+                    String name = ConsoleUtils.promptString(inputScanner,
+                            "Введите название роли, которую хотите изменить: ", true);
 
                     Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                     if (optionalRole.isEmpty()) {
                         System.out.println("Роль с именем " + name + " не была найдена");
                         return;
                     }
-
-                    String newName = getName(inputScanner);
-
                     Role role = optionalRole.get();
+                    System.out.println(role.format());
+
+                    String newName = ConsoleUtils.promptString(inputScanner,
+                            "Введите новое название для роли: ", true);
+
+                    String description = ConsoleUtils.promptString(inputScanner,
+                            "Введите новое описание для роли: ", true);
+
                     role.setDescription(description);
                     system.getRoleManager().updateRoleName(name, newName);
+
+                    System.out.println("Роль успешно обновлена");
+                    system.getAuditLog().log("ROLE_UPDATE", system.getCurrentUser(), name, name + " -> " + newName);
                 });
 
         parser.registerCommand("role-delete",
@@ -108,7 +124,10 @@ public class RoleCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String name = getName(inputScanner);
+                    parser.executeCommand("role-list", scanner, system);
+
+                    String name = ConsoleUtils.promptString(inputScanner,
+                            "Введите название роли: ", true);
 
                     Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                     if (optionalRole.isEmpty()) {
@@ -131,7 +150,7 @@ public class RoleCommands {
                         return;
                     }
 
-                    if (prompt(inputScanner)) {
+                    if (ConsoleUtils.promptYesNo(inputScanner, "Вы уверены ?")) {
                         system.getRoleManager().remove(role);
                         System.out.println("Роль успешно удалена");
                         system.getAuditLog().log("ROLE_DELETE", system.getCurrentUser(), name, "SUCCESS");
@@ -145,7 +164,8 @@ public class RoleCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String name = getName(inputScanner);
+                    String name = ConsoleUtils.promptString(inputScanner,
+                            "Введите название роли: ", true);
 
                     Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                     if (optionalRole.isEmpty()) {
@@ -154,29 +174,8 @@ public class RoleCommands {
                     }
 
                     Role role = optionalRole.get();
-                    Permission permission;
 
-                    while (true) {
-                        System.out.println("Введите данные права");
-                        System.out.println("Имя (например, \"READ\", \"WRITE\", \"DELETE\"):");
-                        String permissionName = inputScanner.nextLine();
-                        System.out.println("Ресурс (например, \"users\", \"reports\", \"settings\"):");
-                        String resource = inputScanner.nextLine();
-                        System.out.println("Описание:");
-                        String description = inputScanner.nextLine();
-
-                        try {
-                            permission = new Permission(permissionName, resource, description);
-                            break;
-                        } catch (Exception e) {
-                            System.out.println("Не удалось создать роль. Ошибка: " + e.getMessage());
-                        }
-                    }
-
-
-                    system.getRoleManager().addPermissionToRole(role.getName(), permission);
-
-                    System.out.println("Новое право успешно добавлено");
+                    roleAddPermissionMainLogic(inputScanner, system, role);
                 });
 
         parser.registerCommand("role-remove-permission",
@@ -184,7 +183,8 @@ public class RoleCommands {
                 (scanner, system) -> {
                     Scanner inputScanner = new Scanner(System.in);
 
-                    String name = getName(inputScanner);
+                    String name = ConsoleUtils.promptString(inputScanner,
+                            "Введите название роли: ", true);
 
                     Optional<Role> optionalRole = system.getRoleManager().findByName(name);
                     if (optionalRole.isEmpty()) {
@@ -273,19 +273,29 @@ public class RoleCommands {
                 });
     }
 
-    private static boolean prompt(Scanner scanner) {
-        System.out.println("Вы уверены да/нет?");
-        String answer = scanner.nextLine().trim();
-        return answer.equals("да");
-    }
+    private static void roleAddPermissionMainLogic(Scanner inputScanner, RBACSystem system, Role role) {
+        Permission permission;
 
-    private static String getName(Scanner scanner) {
-        System.out.println("Введите название роли: ");
-        return scanner.nextLine();
-    }
+        while (true) {
+            System.out.println("Введите данные права");
+            System.out.println("Имя (например, \"READ\", \"WRITE\", \"DELETE\"):");
+            String permissionName = inputScanner.nextLine();
+            System.out.println("Ресурс (например, \"users\", \"reports\", \"settings\"):");
+            String resource = inputScanner.nextLine();
+            System.out.println("Описание:");
+            String description = inputScanner.nextLine();
 
-    private static String getDescription(Scanner scanner) {
-        System.out.println("Введите описание роли:");
-        return scanner.nextLine();
+            try {
+                permission = new Permission(permissionName, resource, description);
+                break;
+            } catch (Exception e) {
+                System.out.println("Не удалось создать роль. Ошибка: " + e.getMessage());
+            }
+        }
+
+
+        system.getRoleManager().addPermissionToRole(role.getName(), permission);
+
+        System.out.println("Новое право успешно добавлено");
     }
 }

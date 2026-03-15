@@ -155,6 +155,7 @@ public class AssignmentManager implements Repository<RoleAssignment> {
             String currentDate = DateUtils.getCurrentDate();
             temporaryAssignment.setExpiresAt(currentDate);
         }
+        remove(assignment);
     }
 
     public void extendTemporaryAssignment(String assignmentId, String newExpirationDate) {
