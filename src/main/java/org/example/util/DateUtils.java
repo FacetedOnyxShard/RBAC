@@ -3,6 +3,7 @@ package org.example.util;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 public class DateUtils {
 
@@ -31,12 +32,24 @@ public class DateUtils {
     }
 
     public static String addDays(String date, int days) {
-        // TODO: impl
-        return null;
+        LocalDate localDate = LocalDate.parse(date);
+        LocalDate newDate = localDate.plusDays(days);
+        return newDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     public static String formatRelativeTime(String date) {
-        // TODO: Implement
-        return null;
+        LocalDate targetDate = LocalDate.parse(date);
+        LocalDate now = LocalDate.now();
+
+        long daysBetween = ChronoUnit.DAYS.between(now, targetDate);
+
+        if (daysBetween == 0) {
+            return "today";
+        } else if (daysBetween > 0) {
+            return String.format("in %d day%s", daysBetween, daysBetween == 1 ? "" : "s");
+        } else {
+            long daysAgo = -daysBetween;
+            return String.format("%d day%s ago", daysAgo, daysAgo == 1 ? "" : "s");
+        }
     }
 }

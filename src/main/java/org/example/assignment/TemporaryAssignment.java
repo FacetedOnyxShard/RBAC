@@ -45,16 +45,10 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
     }
 
     public String getTimeRemaining() {
-        LocalDate now = LocalDate.now();
-        LocalDate deadline = LocalDate.parse(expiresAt);
-
         if (isExpired()) {
             return "Expired";
         }
-
-        long days = ChronoUnit.DAYS.between(now, deadline);
-
-        return String.format("%d days", days);
+        return DateUtils.formatRelativeTime(expiresAt);
     }
 
     @Override
