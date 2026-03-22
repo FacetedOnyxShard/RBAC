@@ -100,6 +100,12 @@ public class CommandRegistry {
                         system.getAuditLog().printLog();
                     });
 
+            parser.registerCommand("audit-log-file",
+                    "Просмотр логов в файле",
+                    (scanner, system) -> {
+                        system.getAuditLog().saveToFile("rbac-reports/log.txt");
+                    });
+
             parser.registerCommand("report-users", "вывести/сохранить отчёт по пользователям",
                     (scanner, system) -> {
                         ReportGenerator reportGenerator = new ReportGenerator();
@@ -113,7 +119,6 @@ public class CommandRegistry {
                             );
 
                             reportGenerator.exportToFile(report, filepath);
-
                         } catch (Exception e) {
                             System.out.printf("Error generating user report: %s\n", e.getMessage());
                         }

@@ -1,5 +1,11 @@
 package org.example.util;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -74,6 +80,26 @@ public class AuditLog {
     }
 
     public void saveToFile(String filename) {
-        // TODO: Implement
+        Path path = Paths.get(filename);
+        if (path.getParent() != null) {
+            try {
+                Files.createDirectories(path.getParent());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+            StringBuilder logs = new StringBuilder("Список логов:\n");
+            for (AuditEntry auditEntry : entries) {
+                logs.append(auditEntry.toString()).append("\n");
+            }
+
+            writer.print(logs);
+
+            System.out.printf("Logs successfully exported to %s\n", filename);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
