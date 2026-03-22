@@ -1,6 +1,5 @@
 package org.example.command.registry;
 
-import de.vandermeer.asciitable.AsciiTable;
 import org.example.assignment.RoleAssignment;
 import org.example.command.CommandParser;
 import org.example.core.Permission;
@@ -9,7 +8,9 @@ import org.example.role.Role;
 import org.example.role.RoleFilter;
 import org.example.role.RoleFilters;
 import org.example.util.ConsoleUtils;
+import org.example.util.FormatUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -21,23 +22,21 @@ public class RoleCommands {
                 (scanner, system) -> {
                     System.out.println("Список ролей:");
 
-                    AsciiTable table = new AsciiTable();
-                    table.addRule();
-                    table.addRow("Номер", "Название", "Количество прав", "ID");
-                    table.addRule();
+                    String[] headers = {"Номер", "Название", "Количество прав", "ID"};
+                    List<String[]> rows = new ArrayList<>();
 
                     int n = 1;
                     for (Role role : system.getRoleManager().findAll()) {
-                        String roleName = role.getName();
-                        String permissionCount = Integer.toString(role.getPermissions().size());
-                        String id = role.getId();
-
-                        table.addRow(n, roleName, permissionCount, id);
-                        table.addRule();
-                        ++n;
+                        rows.add(new String[]{
+                                String.valueOf(n++),
+                                role.getName(),
+                                String.valueOf(role.getPermissions().size()),
+                                role.getId()
+                        });
                     }
 
-                    System.out.println(table.render());
+                    String table = FormatUtils.formatTable(headers, rows);
+                    System.out.println(table);
                 });
 
         parser.registerCommand("role-create",

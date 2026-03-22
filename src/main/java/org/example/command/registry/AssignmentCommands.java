@@ -1,12 +1,12 @@
 package org.example.command.registry;
 
-import de.vandermeer.asciitable.AsciiTable;
 import org.example.assignment.*;
 import org.example.command.CommandParser;
 import org.example.role.Role;
 import org.example.user.User;
 import org.example.util.ConsoleUtils;
 import org.example.util.DateUtils;
+import org.example.util.FormatUtils;
 import org.example.util.ValidationUtils;
 
 import java.util.ArrayList;
@@ -143,29 +143,22 @@ public class AssignmentCommands {
                 "список всех назначений",
                 (scanner, system) -> {
                     List<RoleAssignment> roleAssignmentList = system.getAssignmentManager().findAll();
-                    AsciiTable table = new AsciiTable();
+                    String[] headers = {"username", "role", "type", "status", "assigned at", "assignment ID"};
+                    List<String[]> rows = new ArrayList<>();
 
-                    // table header
-                    table.addRule();
-                    table.addRow("username", "role", "type", "status", "assigned at", "assignment ID");
-                    table.addRule();
-
-                    // table rows
                     for (RoleAssignment roleAssignment : roleAssignmentList) {
-                        String username = roleAssignment.user().username();
-                        Role role = roleAssignment.role();
-                        String type = roleAssignment.assignmentType();
-                        String status = roleAssignment.isActive() ? "Active" : "Inactive";
-                        String assignedAt = roleAssignment.metadata().assignedAt();
-                        String assignmentId = roleAssignment.assignmentId();
-
-
-                        table.addRow(username, role.toString(), type, status, assignedAt, assignmentId);
-                        table.addRule();
+                        rows.add(new String[]{
+                                roleAssignment.user().username(),
+                                roleAssignment.role().toString(),
+                                roleAssignment.assignmentType(),
+                                roleAssignment.isActive() ? "Active" : "Inactive",
+                                roleAssignment.metadata().assignedAt(),
+                                roleAssignment.assignmentId()
+                        });
                     }
 
-
-                    System.out.println(table.render());
+                    String table = FormatUtils.formatTable(headers, rows);
+                    System.out.println(table);
                 });
 
         parser.registerCommand("assignment-list-user",

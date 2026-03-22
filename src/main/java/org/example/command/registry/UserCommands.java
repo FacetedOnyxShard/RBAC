@@ -1,6 +1,5 @@
 package org.example.command.registry;
 
-import de.vandermeer.asciitable.AsciiTable;
 import org.example.assignment.RoleAssignment;
 import org.example.command.CommandParser;
 import org.example.core.Permission;
@@ -9,6 +8,7 @@ import org.example.user.User;
 import org.example.user.UserFilter;
 import org.example.user.UserFilters;
 import org.example.util.ConsoleUtils;
+import org.example.util.FormatUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,23 +25,21 @@ public class UserCommands {
         if (commandWithoutFlags(scanner)) {
             System.out.println("Список всех пользователей:");
 
-            AsciiTable table = new AsciiTable();
-            table.addRule();
-            table.addRow("record idx", "username", "full name", "email");
-            table.addRule();
+            String[] headers = {"record idx", "username", "full name", "email"};
+            List<String[]> rows = new ArrayList<>();
 
             int n = 1;
             for (User user : system.getUserManager().findAll()) {
-                String username = user.username();
-                String fullName = user.fullName();
-                String email = user.email();
-
-                table.addRow(n, username, fullName, email);
-                table.addRule();
-                ++n;
+                rows.add(new String[]{
+                        String.valueOf(n++),
+                        user.username(),
+                        user.fullName(),
+                        user.email()
+                });
             }
 
-            System.out.println(table.render());
+            String table = FormatUtils.formatTable(headers, rows);
+            System.out.println(table);
             return;
         }
 
