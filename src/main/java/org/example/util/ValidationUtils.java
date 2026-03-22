@@ -7,13 +7,29 @@ import java.util.regex.Pattern;
 
 public class ValidationUtils {
 
-    public static boolean isValidUsername(String username) {
+    public static void isValidUsernameSymbols(String username) throws IllegalArgumentException {
         boolean isValidUsername = Pattern.matches("[A-Za-z0-9_]+", username);
         if (!isValidUsername) {
+            throw new IllegalArgumentException("Username must contains only: Latin letters, underscore symbols");
+        }
+    }
+
+    public static void isValidUsernameSize(String username) throws IllegalArgumentException {
+        if (username.length() < 3 || username.length() > 20) {
+            throw new IllegalArgumentException("Username length must be between 3 and 20");
+        }
+    }
+
+    public static boolean isValidUsername(String username) {
+        try {
+            isValidUsernameSymbols(username);
+        } catch (IllegalArgumentException e) {
             return false;
         }
 
-        if (username.length() < 3 || username.length() > 20) {
+        try {
+            isValidUsernameSize(username);
+        } catch (IllegalArgumentException e) {
             return false;
         }
 

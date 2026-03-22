@@ -14,13 +14,11 @@ public record User(String username, String fullName, String email) {
             }
         }
 
-        boolean isValidUsername = Pattern.matches("[A-Za-z0-9_]+", username);
-        if (!isValidUsername) {
-            throw new IllegalArgumentException("Username must contains only: Latin letters, underscore symbols");
-        }
-
-        if (username.length() < 3 || username.length() > 20) {
-            throw new IllegalArgumentException("Username length must be between 3 and 20");
+        try {
+            ValidationUtils.isValidUsernameSymbols(username);
+            ValidationUtils.isValidUsernameSize(username);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e);
         }
 
         if (!ValidationUtils.isValidEmail(email)) {
