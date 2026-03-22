@@ -55,7 +55,7 @@ public abstract class AbstractRoleAssignment implements RoleAssignment {
 
     public String summary() {
         LocalDate dateTime = LocalDate.parse(metadata.assignedAt());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = dateTime.format(formatter);
 
         String summaryBaseTemplate = """
@@ -73,7 +73,7 @@ public abstract class AbstractRoleAssignment implements RoleAssignment {
 
     public String summary(int n) {
         LocalDate dateTime = LocalDate.parse(metadata.assignedAt());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = dateTime.format(formatter);
 
         String summaryBaseTemplate = """

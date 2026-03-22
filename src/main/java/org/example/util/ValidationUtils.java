@@ -50,12 +50,11 @@ public class ValidationUtils {
 
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate.parse(date, formatter);
+            LocalDate parsedDate = LocalDate.parse(date, formatter);
+            return parsedDate.toString().equals(date);
         } catch (Exception e) {
             return false;
         }
-
-        return true;
     }
 
     public static String normalizeString(String input) {
