@@ -45,6 +45,13 @@ public class AssignmentManager implements Repository<RoleAssignment> {
             throw new IllegalArgumentException();
         }
 
+        boolean alreadyActive = assignments.values().stream()
+                .filter(ass -> ass.user().equals(item.user()))
+                .filter(ass -> ass.role().equals(item.role()))
+                .anyMatch(RoleAssignment::isActive);
+        if (alreadyActive) {
+            throw new IllegalArgumentException("User already has an active assignment for role: " + item.role().getName());
+        }
 
         assignments.put(item.assignmentId(), item);
     }
@@ -154,8 +161,9 @@ public class AssignmentManager implements Repository<RoleAssignment> {
         } else if (assignment instanceof  TemporaryAssignment temporaryAssignment) {
             String currentDate = DateUtils.getCurrentDate();
             temporaryAssignment.setExpiresAt(currentDate);
+        } else {
+            throw new IllegalArgumentException("Unknown assignment type");
         }
-        remove(assignment);
     }
 
     public void extendTemporaryAssignment(String assignmentId, String newExpirationDate) {

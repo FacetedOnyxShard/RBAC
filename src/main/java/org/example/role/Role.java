@@ -29,6 +29,10 @@ public class Role {
 
         String transformedName = name.trim();
 
+        if (transformedName.isBlank()) {
+            throw new IllegalArgumentException("Empty role name");
+        }
+
         UUID uuid = UUID.randomUUID();
         this.id = "role_" + uuid;
         this.name = transformedName;

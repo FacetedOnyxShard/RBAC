@@ -19,6 +19,14 @@ public class UserManager implements Repository<User> {
         if (users.containsKey(item.username())) {
             throw new IllegalArgumentException("Duplicate");
         }
+
+        if (!ValidationUtils.isValidUsername(item.username())) {
+            throw new IllegalArgumentException("Incorrect username");
+        }
+        if (!ValidationUtils.isValidEmail(item.email())) {
+            throw new IllegalArgumentException("Incorrect username");
+        }
+
         users.put(item.username(), item);
     }
 
@@ -52,13 +60,13 @@ public class UserManager implements Repository<User> {
                 .toList();
     }
 
-    List<User> findAll(UserFilter filter, Comparator<User> sorter) {
+    public List<User> findAll(UserFilter filter, Comparator<User> sorter) {
         return users.values().stream()
                 .filter(filter::test)
                 .sorted(sorter).toList();
     }
 
-    boolean exists(String username) {
+    public boolean exists(String username) {
         return users.containsKey(ValidationUtils.normalizeString(username));
     }
 
