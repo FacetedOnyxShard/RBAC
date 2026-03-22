@@ -201,10 +201,19 @@ public class TestManagers {
         private static final String[] allowedNames = {"Daniil", "Michail", "Vitalik", "Oleg"};
         private static final String[] allowedSurname = {"Rybkin", "Petrow", "Ivanov", "Sidorov"};
         private static final String[] allowedDomains = {"yandex.ru", "gmail.com", "inbox.list"};
+        private static String[] allowedUsernameSymbols = {
+                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+                "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_"
+        };
+
 
         private static User generateUser() {
             UUID uuid = UUID.randomUUID();
-            String username = allowedUsernamePrefixes[random.nextInt(allowedUsernamePrefixes.length)] + uuid;
+            StringBuilder username = new StringBuilder();
+            for (int i = 0; i < 19; ++i) {
+                username.append(allowedUsernameSymbols[random.nextInt(allowedUsernameSymbols.length)]);
+            }
             String name = allowedNames[random.nextInt(allowedNames.length)];
             String surname = allowedSurname[random.nextInt(allowedSurname.length)];
             String domain = allowedDomains[random.nextInt(allowedDomains.length)];
@@ -212,7 +221,7 @@ public class TestManagers {
             String email = name.toLowerCase() + "." + surname.toLowerCase() + "@" + domain;
             String fullName = name + " " + surname;
 
-            return new User(username, fullName, email);
+            return new User(username.toString(), fullName, email);
         }
     }
 
