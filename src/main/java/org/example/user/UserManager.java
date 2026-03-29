@@ -5,34 +5,37 @@ import org.example.util.ConsoleUtils;
 import org.example.util.ValidationUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserManager implements Repository<User> {
     private final Map<String, User> users; // ключ username
 
     public UserManager() {
-        users = new HashMap<>();
+        users = new ConcurrentHashMap<>();
     }
 
     @Override
     public void add(User item) {
-        if (item == null) throw new IllegalArgumentException();
-        if (users.containsKey(item.username())) {
-            throw new IllegalArgumentException("Duplicate");
-        }
+        if (item == null)
+            throw new IllegalArgumentException("expected User, found null");
 
         if (!ValidationUtils.isValidUsername(item.username())) {
             throw new IllegalArgumentException("Incorrect username");
         }
         if (!ValidationUtils.isValidEmail(item.email())) {
-            throw new IllegalArgumentException("Incorrect username");
+            throw new IllegalArgumentException("Incorrect email");
         }
 
-        users.put(item.username(), item);
+        User previous = users.putIfAbsent(item.username(), item);
+        if (previous != null) {
+            throw new IllegalArgumentException("Duplicate");
+        }
     }
 
     @Override
     public boolean remove(User item) {
-        if (!users.containsKey(item.username())) {
+        if (item == null) {
             return false;
         }
         return users.remove(item.username(), item);
@@ -77,18 +80,12 @@ public class UserManager implements Repository<User> {
 
         final String usernameNormalized = ValidationUtils.normalizeString(username);
 
-        if (!users.containsKey(usernameNormalized)) {
-            throw new IllegalArgumentException("User not exists");
-        }
-
-        User userUpdated;
-        try {
-            userUpdated = User.validate(usernameNormalized, newFullName, newEmail);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-
-        users.replace(usernameNormalized, userUpdated);
+        users.compute(usernameNormalized, (key, oldUser) -> {
+            if (oldUser == null) {
+                throw new IllegalArgumentException("User not exists: " + usernameNormalized);
+            }
+            return User.validate(usernameNormalized, newFullName, newEmail);
+        });
     }
 
     @Override
