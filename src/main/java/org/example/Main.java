@@ -1,17 +1,35 @@
 package org.example;
 
-//TIP Чтобы <b>запустить</b> код, нажмите <shortcut actionId="Run"/> или
-// нажмите на значок <icon src="AllIcons.Actions.Execute"/> в поле.
 public class Main {
-    public static void main(String[] args) {
-        //TIP Нажмите <shortcut actionId="ShowIntentionActions"/>, когда курсор находится на выделенном тексте
-        // чтобы увидеть, как OpenIDE предлагает это исправить.
-        System.out.printf("Hello and welcome!");
+    private static final int THREAD_COUNT = 10;
+    private static final int CALCULATION_STEPS = 20;
+    private static final int DELAY_MS = 200;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Нажмите <shortcut actionId="Debug"/>, чтобы начать отладку вашего кода. Мы установили одну <icon src="AllIcons.Debugger.Db_set_breakpoint"/> точку останова
-            // для вас, но вы всегда можете добавить больше, нажав <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+    public static void main(String[] args) {
+        ThreadInfo[] allThreadsInfo = new ThreadInfo[THREAD_COUNT];
+        for (int i = 0; i < allThreadsInfo.length; ++i) {
+            allThreadsInfo[i] = new ThreadInfo(i + 1, CALCULATION_STEPS, (i % 3 + 1) * 100);
         }
+
+        Renderer renderer = new Renderer(THREAD_COUNT, allThreadsInfo);
+        renderer.hideCursor();
+        renderer.initDisplay();
+
+        WorkerThread[] workers = new WorkerThread[THREAD_COUNT];
+        for (int i = 0; i < workers.length; ++i) {
+            workers[i] = new WorkerThread(allThreadsInfo[i], renderer);
+            workers[i].start();
+        }
+
+        for (int i = 0; i < workers.length; ++i) {
+            try {
+                workers[i].join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        System.out.printf("\033[%d;1H", THREAD_COUNT + 1);
+        renderer.showCursor();
     }
 }
