@@ -98,7 +98,8 @@ public class UserCommands {
 
     private void userViewLogic(Scanner scanner, RBACSystem system)   {
         Scanner inputScanner = new Scanner(System.in);
-        String username = ConsoleUtils.promptString(inputScanner, UsernameFieldHelper.USERNAME.getMessage(), true);
+        String username = ConsoleUtils.promptString(inputScanner,
+                UsernameFieldHelper.USERNAME.getMessage(), true);
 
         Optional<User> userOptional = system.getUserManager().findByUsername(username);
 
@@ -255,7 +256,8 @@ public class UserCommands {
                 });
     }
 
-    private static void searchLogicForManyFilters(List<UsernameFieldHelper> usernameFieldHelpers, List<String> filterValues, RBACSystem system) {
+    private static void searchLogicForManyFilters(List<UsernameFieldHelper> usernameFieldHelpers,
+                                                  List<String> filterValues, RBACSystem system) {
         List<User> userList = system.getUserManager().findAll();
 
         for (int i = 0; i < usernameFieldHelpers.size(); ++i) {
