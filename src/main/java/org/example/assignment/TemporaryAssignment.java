@@ -24,7 +24,7 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
 
     @Override
     public boolean isActive() {
-        String now = DateUtils.getCurrentDate();
+        String now = DateUtils.getCurrentDateTime();
         return DateUtils.isBefore(now, expiresAt);
     }
 

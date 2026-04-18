@@ -44,7 +44,7 @@ public class AuditLog {
         target = ValidationUtils.normalizeString(target);
         details = details == null ? "" : details;
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timestamp = LocalDateTime.now().format(formatter);
 
         AuditEntry entry = new AuditEntry(timestamp, action, performer, target, details);

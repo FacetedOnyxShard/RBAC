@@ -9,19 +9,19 @@ class DateUtilsTest {
 
     @Test
     void isBefore_shouldWork() {
-        assertTrue(DateUtils.isBefore("2023-01-01", "2023-01-02"));
-        assertFalse(DateUtils.isBefore("2023-01-02", "2023-01-01"));
+        assertTrue(DateUtils.isBefore("2023-01-01 00:00:00", "2023-01-02 00:00:00"));
+        assertFalse(DateUtils.isBefore("2023-01-02 00:00:00", "2023-01-01 00:00:00"));
     }
 
     @Test
     void addDays_shouldWork() {
-        assertEquals("2023-01-05", DateUtils.addDays("2023-01-01", 4));
-        assertEquals("2022-12-31", DateUtils.addDays("2023-01-01", -1));
+        assertEquals("2023-01-05 00:00:00", DateUtils.addDays("2023-01-01 00:00:00", 4));
+        assertEquals("2022-12-31 00:00:00", DateUtils.addDays("2023-01-01 00:00:00", -1));
     }
 
     @Test
     void formatRelativeTime_shouldWork() {
-        String today = DateUtils.getCurrentDate();
+        String today = DateUtils.getCurrentDateTime();
         assertEquals("today", DateUtils.formatRelativeTime(today));
 
         String tomorrow = DateUtils.addDays(today, 1);

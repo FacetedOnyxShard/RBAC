@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class DateUtils {
+    public static final DateTimeFormatter defaultFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static String getCurrentDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -13,35 +14,36 @@ public class DateUtils {
     }
 
     public static String getCurrentDateTime() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return LocalDateTime.now().format(formatter);
+        return LocalDateTime.now().format(defaultFormatter);
     }
 
     public static boolean isBefore(String date1, String date2) {
-        LocalDate firstDate = LocalDate.parse(date1);
-        LocalDate secondDate = LocalDate.parse(date2);
-
+        DateTimeFormatter formatter = defaultFormatter;
+        LocalDateTime firstDate = LocalDateTime.parse(date1, formatter);
+        LocalDateTime secondDate = LocalDateTime.parse(date2, formatter);
         return firstDate.isBefore(secondDate);
     }
 
     public static boolean isAfter(String date1, String date2) {
-        LocalDate firstDate = LocalDate.parse(date1);
-        LocalDate secondDate = LocalDate.parse(date2);
-
+        DateTimeFormatter formatter = defaultFormatter;
+        LocalDateTime firstDate = LocalDateTime.parse(date1, formatter);
+        LocalDateTime secondDate = LocalDateTime.parse(date2, formatter);
         return firstDate.isAfter(secondDate);
     }
 
     public static String addDays(String date, int days) {
-        LocalDate localDate = LocalDate.parse(date);
-        LocalDate newDate = localDate.plusDays(days);
-        return newDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDateTime localDate = LocalDateTime.parse(date, defaultFormatter);
+        LocalDateTime newDate = localDate.plusDays(days);
+        return newDate.format(defaultFormatter);
     }
 
     public static String formatRelativeTime(String date) {
-        LocalDate targetDate = LocalDate.parse(date);
-        LocalDate now = LocalDate.now();
+        LocalDateTime targetDateTime = LocalDateTime.parse(date, defaultFormatter);
 
-        long daysBetween = ChronoUnit.DAYS.between(now, targetDate);
+        LocalDate targetDate = targetDateTime.toLocalDate();
+        LocalDate today = LocalDate.now();
+
+        long daysBetween = ChronoUnit.DAYS.between(today, targetDate);
 
         if (daysBetween == 0) {
             return "today";

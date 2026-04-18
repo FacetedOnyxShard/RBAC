@@ -24,9 +24,9 @@ class ValidationUtilsTest {
 
     @Test
     void isValidDate_shouldWork() {
-        assertTrue(ValidationUtils.isValidDate("2025-12-31"));
-        assertFalse(ValidationUtils.isValidDate("2025-02-30"));
-        assertFalse(ValidationUtils.isValidDate("2025/12/31"));
+        assertTrue(ValidationUtils.isValidDate("2025-12-31 23:59:59"));
+        assertFalse(ValidationUtils.isValidDate("2025-02-30 00:00:00"));
+        assertFalse(ValidationUtils.isValidDate("2025/12/31 00:00:00"));
     }
 
     @Test
