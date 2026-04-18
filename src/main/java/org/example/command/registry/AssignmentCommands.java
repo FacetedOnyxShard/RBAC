@@ -56,7 +56,7 @@ public class AssignmentCommands {
                     String expirationDate = null;
                     if (selectedAssignmentType == 1) {
                         expirationDate = ConsoleUtils.promptString(inputScanner,
-                                "Введите дату истечения (формат yyyy-MM-dd):", true);
+                                "Введите дату истечения (формат yyyy-MM-dd HH:mm:ss):", true);
 
                         if (!ValidationUtils.isValidDate(expirationDate)) {
                             throw new RuntimeException("Incorrect date format");

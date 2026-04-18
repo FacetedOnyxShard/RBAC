@@ -18,7 +18,7 @@ public record AssignmentMetadata(String assignedBy, String assignedAt, String re
     }
 
     public static AssignmentMetadata now(String assignedBy, String reason) {
-        String assignedNow = DateUtils.getCurrentDate();
+        String assignedNow = DateUtils.getCurrentDateTime();
         return new AssignmentMetadata(assignedBy, assignedNow, reason);
     }
 

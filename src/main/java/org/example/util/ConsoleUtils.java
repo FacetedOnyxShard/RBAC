@@ -52,8 +52,7 @@ public class ConsoleUtils {
         String selectMessage = String.format("Введите число от 1 до %d", options.size());
         while (true) {
             try {
-                int selectedNum = promptInt(scanner, selectMessage, 1, options.size());
-                return selectedNum;
+                return promptInt(scanner, selectMessage, 1, options.size());
             } catch (Exception e) {
                 System.out.println("Число некорректно\n");
             }

@@ -2,8 +2,9 @@ package org.example.assignment;
 
 import org.example.role.Role;
 import org.example.user.User;
+import org.example.util.DateUtils;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
@@ -54,8 +55,8 @@ public abstract class AbstractRoleAssignment implements RoleAssignment {
     public abstract String assignmentType();
 
     public String summary() {
-        LocalDate dateTime = LocalDate.parse(metadata.assignedAt());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime dateTime = LocalDateTime.parse(metadata.assignedAt());
+        DateTimeFormatter formatter = DateUtils.defaultFormatter;
         String formattedDate = dateTime.format(formatter);
 
         String summaryBaseTemplate = """
@@ -72,8 +73,8 @@ public abstract class AbstractRoleAssignment implements RoleAssignment {
 
 
     public String summary(int n) {
-        LocalDate dateTime = LocalDate.parse(metadata.assignedAt());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime dateTime = LocalDateTime.parse(metadata.assignedAt());
+        DateTimeFormatter formatter = DateUtils.defaultFormatter;
         String formattedDate = dateTime.format(formatter);
 
         String summaryBaseTemplate = """

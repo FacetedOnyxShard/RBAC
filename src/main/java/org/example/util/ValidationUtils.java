@@ -1,10 +1,13 @@
 package org.example.util;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.util.regex.Pattern;
 
 public class ValidationUtils {
+    private static final DateTimeFormatter defaultFormatter = DateUtils.defaultFormatter;
 
     public static void isValidUsernameSymbols(String username) throws IllegalArgumentException {
         boolean isValidUsername = Pattern.matches("[A-Za-z0-9_]+", username);
@@ -44,14 +47,14 @@ public class ValidationUtils {
     }
 
     public static boolean isValidDate(String date) {
-        if (date == null || date.length() != "2026-02-07".length()) {
+        if (date == null) {
             return false;
         }
 
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate parsedDate = LocalDate.parse(date, formatter);
-            return parsedDate.toString().equals(date);
+            String isoDateTime = date.replace(' ', 'T');
+            LocalDateTime parsedDate = LocalDateTime.parse(isoDateTime);
+            return true;
         } catch (Exception e) {
             return false;
         }
