@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserManager implements Repository<User> {
     private final Map<String, User> users; // ключ username
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     public UserManager() {
         users = new ConcurrentHashMap<>();
@@ -115,5 +116,28 @@ public class UserManager implements Repository<User> {
     @Override
     public int hashCode() {
         return Objects.hash(users);
+    }
+
+    public List<User> findByFilterParallel(UserFilter filter) {
+        lock.readLock().lock();
+        try {
+            return users.values().parallelStream()
+                    .filter(filter::test)
+                    .toList();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public List<User> findAllParallel(UserFilter filter, Comparator<User> sorter) {
+        lock.readLock().lock();
+        try {
+            return users.values().parallelStream()
+                    .filter(filter::test)
+                    .sorted(sorter)
+                    .toList();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 }
