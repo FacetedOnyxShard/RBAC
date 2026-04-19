@@ -10,13 +10,40 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AuditLog {
+    private final List<AuditEntry> entries = new ArrayList<>();;
 
-    private final List<AuditEntry> entries;
+    private final BlockingQueue<AuditEntry> logQueue = new LinkedBlockingQueue<>();
+    private final AtomicBoolean running = new AtomicBoolean(true);
+    private final Thread logProcessorThread;
 
     public AuditLog() {
-        entries = new ArrayList<>();
+        logProcessorThread = new Thread(() -> {
+            while (running.get() || !logQueue.isEmpty()) {
+                try {
+                    AuditEntry entry = logQueue.take();
+                    synchronized (entries) {
+                        entries.add(entry);
+                    }
+                } catch (InterruptedException e) {
+                     Thread.currentThread().interrupt();
+                     break;
+                }
+            }
+
+            List<AuditEntry> remaining = new ArrayList<>();
+            logQueue.drainTo(remaining);
+            synchronized (entries) {
+                entries.addAll(remaining);
+            }
+        }, "AuditProcessor");
+
+        logProcessorThread.setDaemon(true);
+        logProcessorThread.start();
     }
 
     public record AuditEntry(
@@ -35,6 +62,16 @@ public class AuditLog {
         }
     }
 
+    public void shutdown() {
+        running.set(false);
+        logProcessorThread.interrupt();
+        try {
+            logProcessorThread.join(5000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public void log(String action, String performer, String target, String details) {
         ValidationUtils.requireNonNullEmpty(action, "action");
         ValidationUtils.requireNonNullEmpty(performer, "performer");
@@ -49,27 +86,31 @@ public class AuditLog {
 
         AuditEntry entry = new AuditEntry(timestamp, action, performer, target, details);
 
-        entries.add(entry);
+        logQueue.offer(entry);
     }
 
     public List<AuditEntry> getAll() {
-        return new ArrayList<>(entries);
+        synchronized (entries) {
+            return new ArrayList<>(entries);
+        }
     }
 
     public List<AuditEntry> getByPerformer(String performer) {
-        final String normalizedPerformer = ValidationUtils.normalizeString(performer);
-
-        return entries.stream()
-                .filter((entry) -> entry.performer().equals(normalizedPerformer))
-                .toList();
+        synchronized (entries) {
+            final String normalizedPerformer = ValidationUtils.normalizeString(performer);
+            return entries.stream()
+                    .filter((entry) -> entry.performer().equals(normalizedPerformer))
+                    .toList();
+        }
     }
 
     public List<AuditEntry> getByAction(String action) {
-        final String normalizedAction = ValidationUtils.normalizeString(action);
-
-        return entries.stream()
-                .filter((entry) -> entry.action().equals(normalizedAction))
-                .toList();
+        synchronized (entries) {
+            final String normalizedAction = ValidationUtils.normalizeString(action);
+            return entries.stream()
+                    .filter((entry) -> entry.action().equals(normalizedAction))
+                    .toList();
+        }
     }
 
     public void printLog() {
@@ -91,11 +132,14 @@ public class AuditLog {
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             StringBuilder logs = new StringBuilder("Список логов:\n");
-            for (AuditEntry auditEntry : entries) {
-                logs.append(auditEntry.toString()).append("\n");
-            }
 
-            writer.print(logs);
+            synchronized (entries) {
+                for (AuditEntry auditEntry : entries) {
+                    logs.append(auditEntry.toString()).append("\n");
+                }
+
+                writer.print(logs);
+            }
 
             System.out.printf("Logs successfully exported to %s\n", filename);
         } catch (IOException e) {

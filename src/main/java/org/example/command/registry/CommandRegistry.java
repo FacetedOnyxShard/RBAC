@@ -1,12 +1,19 @@
 package org.example.command.registry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.example.assignment.*;
 import org.example.command.CommandParser;
 import org.example.core.RBACSystem;
+import org.example.core.RBACSystemData;
 import org.example.role.Role;
 import org.example.user.User;
 import org.example.util.ReportGenerator;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -160,6 +167,74 @@ public class CommandRegistry {
                         } catch (Exception e) {
                             System.out.printf("Error generating permission matrix: %s\n", e.getMessage());
                         }
+                    });
+
+            parser.registerCommand("report-users-async", "Generate user report asynchronously",
+                    (scanner, system) -> {
+                        String filepath = "rbac-reports/users_async.txt";
+
+                        system.getExecutorService().submit(() -> {
+                            try {
+                                ReportGenerator reportGenerator = new ReportGenerator();
+
+                                String report = reportGenerator.generateUserReportParallel(
+                                        system.getUserManager(),
+                                        system.getAssignmentManager()
+                                );
+
+                                reportGenerator.exportToFile(report, filepath);
+
+                                system.getAuditLog().log(
+                                        "report-users-async", system.getCurrentUser(), "report", "success"
+                                );
+                            } catch (Exception e) {
+                                System.err.println("[ASYNC] Error generating user report: " + e.getMessage());
+                                system.getAuditLog().log(
+                                        "report-users-async", system.getCurrentUser(), "report", "error: " + e.getMessage()
+                                );
+                            }
+                        });
+
+                        System.out.println("Async task submitted. Data will be saved in " + filepath + "\nYou can continue using the system.");
+                    });
+
+            parser.registerCommand("save-async", "Save data to JSON file asynchronously",
+                    (scanner, system) -> {
+                        String filepath = "rbac-data/data_async.json";
+                        system.getExecutorService().submit(() -> {
+                            try {
+                                Path path = Paths.get(filepath);
+
+                                Files.createDirectories(path.getParent());
+                                if (!Files.exists(path)) {
+                                    Files.createFile(path);
+                                }
+
+                                List<User> users = system.getUserManager().findAll();
+                                List<Role> roles = system.getRoleManager().findAll();
+                                List<AbstractRoleAssignment> assignments = system.getAssignmentManager().findAll()
+                                        .stream()
+                                        .map(assignment -> (AbstractRoleAssignment) assignment)
+                                        .toList();
+
+                                RBACSystemData systemData = new RBACSystemData(users, roles, assignments);
+
+                                ObjectMapper mapper = new ObjectMapper();
+                                mapper.enable(SerializationFeature.INDENT_OUTPUT);
+                                mapper.writeValue(new File(filepath), systemData);
+
+                                system.getAuditLog().log(
+                                        "save-async", system.getCurrentUser(), "data", "success"
+                                );
+                            } catch (Exception e) {
+                                System.err.println("Error saving data: " + e.getMessage());
+                                system.getAuditLog().log(
+                                        "save-async", system.getCurrentUser(), "data", "error: " + e.getMessage()
+                                );
+                            }
+                        });
+
+                        System.out.println("Async task submitted. Data will be saved in " + filepath + "\nYou can continue using the system.");
                     });
         }
     }

@@ -37,6 +37,9 @@ public class Main {
                         help - список доступных команд,
                         exit - выход
                         """);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(system::shutdown));
+
         while (true) {
             System.out.println("Введите команду:");
             try {
