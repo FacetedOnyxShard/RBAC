@@ -3,6 +3,7 @@ package org.example.assignment;
 import org.example.core.Permission;
 import org.example.core.Repository;
 import org.example.role.Role;
+import org.example.role.RoleFilter;
 import org.example.role.RoleManager;
 import org.example.user.User;
 import org.example.user.UserManager;
@@ -267,6 +268,31 @@ public class AssignmentManager implements Repository<RoleAssignment> {
             }
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    public List<RoleAssignment> findByFilterParallel(AssignmentFilter filter) {
+        lock.readLock().lock();
+        try {
+            return assignments.values()
+                    .parallelStream()
+                    .filter(filter::test)
+                    .toList();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public List<RoleAssignment> findAllParallel(AssignmentFilter filter, Comparator<RoleAssignment> sorter) {
+        lock.readLock().lock();
+        try {
+            return assignments.values()
+                    .parallelStream()
+                    .filter(filter::test)
+                    .sorted(sorter)
+                    .toList();
+        } finally {
+            lock.readLock().unlock();
         }
     }
 }
