@@ -40,8 +40,8 @@ class AuditLogTest {
         log.log("CREATE", "admin", "u1", null);
         log.log("DELETE", "admin", "u2", null);
         log.log("CREATE", "user1", "u3", null);
-        List<AuditLog.AuditEntry> entries = log.getByPerformer("admin");
         waitForLogProcessing();
+        List<AuditLog.AuditEntry> entries = log.getByPerformer("admin");
 
         assertEquals(2, entries.size());
     }
