@@ -43,3 +43,8 @@ bin/
 .DS_Store
 
 rbac-reports/
+venv
+.gradle
+.github
+.idea
+gradle
